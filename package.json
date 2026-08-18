@@ -23,7 +23,6 @@
   },
   "workspaces": [
     "api",
-    "dashboard",
-    "sdks/js"
+    "dashboard"
   ]
 }
