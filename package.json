@@ -1,0 +1,29 @@
+{
+  "name": "releasepace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ReleasePace — production-grade feature flag platform",
+  "scripts": {
+    "setup":          "bash scripts/setup.sh",
+    "dev:api":        "cd api && npm run dev",
+    "dev:dashboard":  "cd dashboard && npm run dev",
+    "dev":            "concurrently -n api,dashboard -c blue,violet \"npm run dev:api\" \"npm run dev:dashboard\"",
+    "build:api":      "cd api && npm run build",
+    "build:dashboard":"cd dashboard && npm run build",
+    "build:sdk:js":   "cd sdks/js && npm run build",
+    "build:all":      "npm run build:api && npm run build:dashboard && npm run build:sdk:js",
+    "typecheck:api":  "cd api && npx tsc --noEmit",
+    "typecheck:dash": "cd dashboard && npx tsc --noEmit",
+    "typecheck":      "npm run typecheck:api && npm run typecheck:dash",
+    "lint:python":    "cd sdks/python && ruff check releasepace/",
+    "lint:go":        "cd sdks/go && go vet ./..."
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "workspaces": [
+    "api",
+    "dashboard",
+    "sdks/js"
+  ]
+}

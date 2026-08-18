@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReleasePace — Ship features with confidence</title>
+  <meta name="description" content="Production-grade feature flags for engineering teams. Control every release. Zero infrastructure. Free to start." />
+  <meta property="og:title" content="ReleasePace — Ship features with confidence" />
+  <meta property="og:description" content="Feature flag platform for teams that move fast. SDKs for JS, Python, Java, Go, and any HTTP client." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080B14;
+      --surface:   #0E1220;
+      --card:      #111827;
+      --border:    rgba(255,255,255,0.07);
+      --border-hi: rgba(255,255,255,0.12);
+      --text:      #F0F2F8;
+      --muted:     #6B7280;
+      --subtle:    #374151;
+      --violet:    #7B61FF;
+      --violet-hi: #9D87FF;
+      --blue:      #4F9EFF;
+      --emerald:   #34D399;
+      --amber:     #FBBF24;
+      --grad:      linear-gradient(135deg, #7B61FF, #4F9EFF);
+      --display:   'Syne', sans-serif;
+      --body:      'Inter', system-ui, sans-serif;
+      --mono:      'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: 0.4;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,11,20,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--display); font-size: 17px; font-weight: 700;
+      color: var(--text); text-decoration: none;
+    }
+    .nav-logo-mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--grad);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-mark svg { width: 14px; height: 14px; }
+
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 13px; color: var(--muted); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 20px; border-radius: 9px; font-size: 13px;
+      font-weight: 500; cursor: pointer; border: none;
+      font-family: var(--body); text-decoration: none;
+      transition: all 0.15s; line-height: 1;
+    }
+    .btn-primary {
+      background: var(--grad); color: #fff;
+      box-shadow: 0 0 24px rgba(123,97,255,0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 32px rgba(123,97,255,0.45);
+    }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--border-hi); color: var(--text); }
+    .btn-lg { padding: 13px 28px; font-size: 15px; border-radius: 11px; }
+    .btn-xl { padding: 16px 36px; font-size: 16px; border-radius: 12px; font-weight: 600; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 5% 80px;
+      position: relative;
+    }
+
+    /* Radial glow behind hero text */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 20%; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(123,97,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(123,97,255,0.1); border: 1px solid rgba(123,97,255,0.25);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 12px; font-weight: 500; color: var(--violet-hi);
+      margin-bottom: 28px; position: relative; z-index: 1;
+    }
+    .eyebrow-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .hero-h1 {
+      font-family: var(--display);
+      font-size: clamp(44px, 7vw, 80px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.05;
+      margin-bottom: 24px;
+      position: relative; z-index: 1;
+      max-width: 900px;
+    }
+    .hero-h1 .grad-text {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 19px);
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+      position: relative; z-index: 1;
+    }
+
+    .hero-actions {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap; justify-content: center;
+      margin-bottom: 60px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── Live counter (signature element) ── */
+    .live-counter {
+      display: inline-flex; align-items: center; gap: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      border-radius: 16px;
+      padding: 16px 28px;
+      position: relative; z-index: 1;
+    }
+    .counter-item { text-align: center; }
+    .counter-val {
+      font-family: var(--display);
+      font-size: 26px; font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1; display: block;
+    }
+    .counter-lbl {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin-top: 3px; display: block;
+    }
+    .counter-divider { width: 1px; height: 40px; background: var(--border); }
+    .counter-live {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--emerald);
+    }
+
+    /* ── Social proof logos ── */
+    .logos-bar {
+      padding: 48px 5% 0;
+      text-align: center;
+    }
+    .logos-lbl { font-size: 12px; color: var(--subtle); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 28px; }
+    .logos-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 48px; flex-wrap: wrap;
+    }
+    .logo-item {
+      font-family: var(--display); font-size: 15px; font-weight: 700;
+      color: var(--subtle); letter-spacing: -0.3px;
+    }
+
+    /* ── Sections ── */
+    section { padding: 100px 5%; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    .eyebrow-small {
+      font-size: 11px; font-weight: 500; color: var(--violet);
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin-bottom: 14px;
+    }
+    .section-h2 {
+      font-family: var(--display);
+      font-size: clamp(30px, 4vw, 46px);
+      font-weight: 700; letter-spacing: -1px;
+      line-height: 1.1; margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px; color: var(--muted); max-width: 520px;
+      line-height: 1.6;
+    }
+
+    /* ── Feature grid ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 56px;
+    }
+    .feature-card {
+      background: var(--card);
+      padding: 32px 28px;
+      transition: background 0.2s;
+    }
+    .feature-card:hover { background: var(--surface); }
+    .feature-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px; font-size: 18px;
+    }
+    .feature-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── SDK tabs ── */
+    .sdk-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    .sdk-tabs { display: flex; gap: 4px; margin-bottom: 24px; flex-wrap: wrap; }
+    .sdk-tab {
+      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+      color: var(--muted); background: transparent; font-family: var(--body);
+    }
+    .sdk-tab:hover { color: var(--text); border-color: var(--border); }
+    .sdk-tab.active { background: rgba(123,97,255,0.12); color: var(--violet-hi); border-color: rgba(123,97,255,0.3); }
+
+    .sdk-panels { position: relative; }
+    .sdk-panel { display: none; }
+    .sdk-panel.active { display: block; }
+
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: #CBD5E1;
+    }
+    .hl-comment { color: #4B5563; }
+    .hl-kw      { color: #818CF8; }
+    .hl-str     { color: #34D399; }
+    .hl-fn      { color: #60A5FA; }
+    .hl-cls     { color: #FBBF24; }
+    .hl-var     { color: #F0F2F8; }
+
+    /* ── Comparison table ── */
+    .compare-table {
+      width: 100%; border-collapse: collapse;
+      border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; margin-top: 48px;
+    }
+    .compare-table th, .compare-table td {
+      padding: 16px 20px; text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .compare-table thead th {
+      background: var(--surface);
+      font-family: var(--display); font-weight: 700; font-size: 14px;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table td:first-child { color: var(--muted); }
+    .compare-table .highlight { background: rgba(123,97,255,0.04); }
+    .compare-table th.highlight { background: rgba(123,97,255,0.1); color: var(--violet-hi); }
+    .check { color: var(--emerald); font-size: 16px; }
+    .cross { color: var(--subtle); font-size: 16px; }
+    .partial { color: var(--amber); font-size: 13px; }
+
+    /* ── Pricing ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px; margin-top: 48px;
+    }
+    .pricing-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      display: flex; flex-direction: column;
+    }
+    .pricing-card.featured {
+      border-color: rgba(123,97,255,0.4);
+      background: linear-gradient(160deg, rgba(123,97,255,0.08), var(--card));
+      position: relative; overflow: hidden;
+    }
+    .pricing-card.featured::before {
+      content: 'Most popular';
+      position: absolute; top: 16px; right: 16px;
+      font-size: 10px; font-weight: 600;
+      color: var(--violet-hi); text-transform: uppercase; letter-spacing: 1px;
+      background: rgba(123,97,255,0.15); border: 1px solid rgba(123,97,255,0.3);
+      padding: 3px 10px; border-radius: 100px;
+    }
+    .plan-name { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .plan-price {
+      font-family: var(--display); font-size: 42px; font-weight: 800;
+      letter-spacing: -1.5px; line-height: 1; margin-bottom: 6px;
+    }
+    .plan-price span { font-size: 16px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .plan-desc { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .plan-features { list-style: none; flex: 1; margin-bottom: 28px; }
+    .plan-features li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .plan-features li:last-child { border: none; }
+    .plan-features li::before { content: '→'; color: var(--violet); flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Testimonials ── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px; margin-top: 48px;
+    }
+    .testimonial {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px;
+    }
+    .testimonial-text {
+      font-size: 14px; color: var(--muted); line-height: 1.7;
+      margin-bottom: 20px; font-style: italic;
+    }
+    .testimonial-text::before { content: '"'; color: var(--violet); font-size: 20px; font-style: normal; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .author-name { font-size: 13px; font-weight: 500; }
+    .author-role { font-size: 11px; color: var(--muted); }
+
+    /* ── CTA section ── */
+    .cta-section {
+      text-align: center;
+      background: radial-gradient(ellipse at center, rgba(123,97,255,0.1) 0%, transparent 70%);
+    }
+    .cta-section .section-h2 { margin-bottom: 10px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    footer a { color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.15s; }
+    footer a:hover { color: var(--text); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-copy { font-size: 12px; color: var(--subtle); }
+    .footer-author-link {
+      color: var(--muted); text-decoration: none;
+      border-bottom: 1px dotted var(--subtle); padding-bottom: 1px;
+      transition: color 0.15s;
+    }
+    .footer-author-link:hover { color: var(--violet-hi); border-color: var(--violet-hi); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--subtle); border-radius: 3px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 4%; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 4% 60px; }
+      section { padding: 64px 4%; }
+      .live-counter { flex-wrap: wrap; justify-content: center; }
+      .compare-table { font-size: 11px; }
+      .compare-table th, .compare-table td { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ─────────────────────────────────────────────────── -->
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2L7 5L12 2V9L7 12L2 9V2Z" fill="white" opacity="0.9"/>
+      </svg>
+    </div>
+    ReleasePace
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#sdks">SDKs</a>
+    <a href="#compare">Compare</a>
+    <a href="#pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+  </div>
+  <div class="nav-right">
+    <a href="/login" class="btn btn-ghost">Sign in</a>
+    <a href="/signup" class="btn btn-primary">Start free →</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="eyebrow-dot"></span>
+    Now in public beta · Free forever on Cloudflare + Supabase
+  </div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:20px;position:relative;z-index:1;">
+    Built by
+    <a href="https://github.com/AryaaTiwari" target="_blank" rel="noopener"
+      style="color:var(--violet-hi);text-decoration:none;border-bottom:1px dotted rgba(157,135,255,0.4);">
+      Aryaa Tiwari
+    </a>
+    &nbsp;·&nbsp;
+    <a href="https://www.linkedin.com/in/aryaa-tiwari/" target="_blank" rel="noopener"
+      style="color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--subtle);transition:color 0.15s;"
+      onmouseover="this.style.color='var(--violet-hi)'" onmouseout="this.style.color='var(--muted)'">
+      LinkedIn
+    </a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/AryaaTiwari" target="_blank" rel="noopener"
+      style="color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--subtle);transition:color 0.15s;"
+      onmouseover="this.style.color='var(--violet-hi)'" onmouseout="this.style.color='var(--muted)'">
+      GitHub
+    </a>
+  </p>
+  <h1 class="hero-h1">
+    Ship features.<br />
+    <span class="grad-text">Control everything.</span>
+  </h1>
+  <p class="hero-sub">
+    Production-grade feature flags for engineering teams.
+    Toggle any feature in any app — instantly, safely, without a deploy.
+  </p>
+  <div class="hero-actions">
+    <a href="/signup" class="btn btn-primary btn-xl">Start for free</a>
+    <a href="/docs" class="btn btn-ghost btn-lg">Read the docs →</a>
+  </div>
+
+  <!-- Live counter — signature element -->
+  <div class="live-counter">
+    <div class="counter-item">
+      <span class="counter-val" id="evalCount">0</span>
+      <span class="counter-lbl">Flag evaluations today</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-item">
+      <span class="counter-val" id="orgCount">0</span>
+      <span class="counter-lbl">Organisations</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-item">
+      <span class="counter-val" id="latency">0ms</span>
+      <span class="counter-lbl">Avg SDK latency</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-live">
+      <span class="eyebrow-dot"></span>
+      Live
+    </div>
+  </div>
+</section>
+
+<!-- ── Logo bar ───────────────────────────────────────────────→ -->
+<div class="logos-bar">
+  <p class="logos-lbl">Trusted by engineering teams at</p>
+  <div class="logos-row">
+    <span class="logo-item">Meridian Labs</span>
+    <span class="logo-item">Polygon</span>
+    <span class="logo-item">Kota Systems</span>
+    <span class="logo-item">Velox</span>
+    <span class="logo-item">Arcbridge</span>
+    <span class="logo-item">Tandem</span>
+  </div>
+</div>
+
+<!-- ── Features ──────────────────────────────────────────────── -->
+<section id="features">
+  <div class="section-inner">
+    <div class="eyebrow-small">Platform</div>
+    <h2 class="section-h2">Everything a release needs.<br />Nothing it doesn't.</h2>
+    <p class="section-sub">
+      Built for teams shipping multiple times a day. Every flag change propagates to your SDKs in under 30 seconds.
+    </p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(123,97,255,0.1)">⚑</div>
+        <div class="feature-title">Flag types that cover everything</div>
+        <div class="feature-desc">Boolean toggles, string variants, number thresholds, and full JSON payloads. One platform for all your flag shapes.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(52,211,153,0.1)">◎</div>
+        <div class="feature-title">Environments built in</div>
+        <div class="feature-desc">Dev, staging, production — each with their own flag state. Same key, different value. No extra configuration.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(79,158,255,0.1)">⊕</div>
+        <div class="feature-title">Gradual rollouts</div>
+        <div class="feature-desc">Roll out to 5%, then 25%, then 100%. Sticky bucketing means the same user always gets the same experience.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(251,191,36,0.1)">🔑</div>
+        <div class="feature-title">Scoped API keys</div>
+        <div class="feature-desc">Client, server, and admin keys. Each scoped to a specific environment. Revoke any key instantly without redeploying.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(239,68,68,0.1)">⊘</div>
+        <div class="feature-title">Kill switch</div>
+        <div class="feature-desc">One click disables any flag across all environments immediately. Your fastest incident response tool.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(123,97,255,0.1)">≡</div>
+        <div class="feature-title">Full audit log</div>
+        <div class="feature-desc">Every change recorded with who made it, when, and what changed. SOC2-ready from day one.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(52,211,153,0.1)">⛨</div>
+        <div class="feature-title">Tenant isolation</div>
+        <div class="feature-desc">Postgres Row-Level Security enforces org isolation at the database level. A leaked key cannot touch another org's flags.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(79,158,255,0.1)">◈</div>
+        <div class="feature-title">RBAC roles</div>
+        <div class="feature-desc">Owner, Admin, Editor, Viewer. Control who can create flags, who can toggle them, and who can only read.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SDKs ───────────────────────────────────────────────────→ -->
+<section id="sdks" class="sdk-section">
+  <div class="section-inner">
+    <div class="eyebrow-small">SDKs</div>
+    <h2 class="section-h2">One API. Any language.</h2>
+    <p class="section-sub">
+      All SDKs speak to the same REST endpoint. Add any language to your stack in under 5 minutes.
+    </p>
+
+    <div style="margin-top:40px">
+      <div class="sdk-tabs">
+        <button class="sdk-tab active" onclick="showSDK('js')">JavaScript</button>
+        <button class="sdk-tab" onclick="showSDK('react')">React</button>
+        <button class="sdk-tab" onclick="showSDK('python')">Python</button>
+        <button class="sdk-tab" onclick="showSDK('java')">Java</button>
+        <button class="sdk-tab" onclick="showSDK('go')">Go</button>
+        <button class="sdk-tab" onclick="showSDK('http')">REST / curl</button>
+      </div>
+
+      <div class="sdk-panels">
+        <div class="sdk-panel active" id="sdk-js">
+<pre><span class="hl-comment">// npm install releasepace-js</span>
+<span class="hl-kw">import</span> { <span class="hl-cls">ReleasePace</span> } <span class="hl-kw">from</span> <span class="hl-str">'releasepace-js'</span>
+
+<span class="hl-kw">const</span> <span class="hl-var">rp</span> = <span class="hl-kw">new</span> <span class="hl-cls">ReleasePace</span>({
+  apiKey: <span class="hl-str">'rp_live_xxxxxxxxxxxx'</span>,
+  environment: <span class="hl-str">'production'</span>,
+})
+
+<span class="hl-kw">await</span> rp.<span class="hl-fn">connect</span>()
+
+<span class="hl-kw">if</span> (rp.<span class="hl-fn">isEnabled</span>(<span class="hl-str">'new-checkout'</span>)) {
+  <span class="hl-fn">renderNewCheckout</span>()
+}
+
+<span class="hl-kw">const</span> <span class="hl-var">label</span> = rp.<span class="hl-fn">getString</span>(<span class="hl-str">'cta-label'</span>, <span class="hl-str">'Get started'</span>)
+<span class="hl-kw">const</span> <span class="hl-var">limit</span> = rp.<span class="hl-fn">getNumber</span>(<span class="hl-str">'rate-limit'</span>, 100)</pre>
+        </div>
+
+        <div class="sdk-panel" id="sdk-react">
+<pre><span class="hl-comment">// npm install releasepace-js</span>
+<span class="hl-kw">import</span> { <span class="hl-cls">ReleasePaceProvider</span>, <span class="hl-fn">useFlag</span> } <span class="hl-kw">from</span> <span class="hl-str">'releasepace-js/react'</span>
+
+<span class="hl-kw">function</span> <span class="hl-fn">App</span>() {
+  <span class="hl-kw">return</span> (
+    &lt;<span class="hl-cls">ReleasePaceProvider</span> apiKey=<span class="hl-str">"rp_live_xxx"</span> environment=<span class="hl-str">"production"</span>&gt;
+      &lt;<span class="hl-cls">MyApp</span> /&gt;
+    &lt;/<span class="hl-cls">ReleasePaceProvider</span>&gt;
+  )
+}
+
+<span class="hl-kw">function</span> <span class="hl-fn">Checkout</span>() {
+  <span class="hl-kw">const</span> <span class="hl-var">newFlow</span>   = <span class="hl-fn">useFlag</span>(<span class="hl-str">'new-checkout'</span>)
+  <span class="hl-kw">const</span> <span class="hl-var">ctaLabel</span>  = <span class="hl-fn">useFlag</span>(<span class="hl-str">'cta-label'</span>, <span class="hl-str">'Buy now'</span>)
+
+  <span class="hl-kw">return</span> newFlow ? &lt;<span class="hl-cls">NewFlow</span> label={ctaLabel} /&gt; : &lt;<span class="hl-cls">OldFlow</span> /&gt;
+}</pre>
+        </div>
+
+        <div class="sdk-panel" id="sdk-python">
+<pre><span class="hl-comment"># pip install releasepace</span>
+<span class="hl-kw">from</span> releasepace <span class="hl-kw">import</span> <span class="hl-cls">ReleasePace</span>
+
+<span class="hl-kw">with</span> <span class="hl-cls">ReleasePace</span>(
+  api_key=<span class="hl-str">'rp_live_xxxxxxxxxxxx'</span>,
+  environment=<span class="hl-str">'production'</span>,
+) <span class="hl-kw">as</span> rp:
+
+  <span class="hl-kw">if</span> rp.<span class="hl-fn">is_enabled</span>(<span class="hl-str">'new-checkout'</span>):
+    <span class="hl-fn">render_new_checkout</span>()
+
+  limit = rp.<span class="hl-fn">get_number</span>(<span class="hl-str">'rate-limit'</span>, default=100)
+  label = rp.<span class="hl-fn">get_string</span>(<span class="hl-str">'cta-label'</span>, default=<span class="hl-str">'Get started'</span>)</pre>
+        </div>
+
+        <div class="sdk-panel" id="sdk-java">
+<pre><span class="hl-comment">// Maven: io.releasepace:releasepace-java:1.0.0</span>
+<span class="hl-kw">import</span> io.releasepace.<span class="hl-cls">ReleasePace</span>;
+
+<span class="hl-kw">try</span> (<span class="hl-cls">ReleasePace</span> <span class="hl-var">rp</span> = <span class="hl-cls">ReleasePace</span>.<span class="hl-fn">builder</span>()
+    .<span class="hl-fn">apiKey</span>(<span class="hl-str">"rp_live_xxxxxxxxxxxx"</span>)
+    .<span class="hl-fn">environment</span>(<span class="hl-str">"production"</span>)
+    .<span class="hl-fn">build</span>()
+    .<span class="hl-fn">connect</span>()) {
+
+  <span class="hl-kw">if</span> (rp.<span class="hl-fn">isEnabled</span>(<span class="hl-str">"new-checkout"</span>)) {
+    <span class="hl-fn">renderNewCheckout</span>();
+  }
+
+  <span class="hl-cls">String</span> <span class="hl-var">label</span>  = rp.<span class="hl-fn">getString</span>(<span class="hl-str">"cta-label"</span>, <span class="hl-str">"Get started"</span>);
+  <span class="hl-kw">double</span> <span class="hl-var">limit</span>  = rp.<span class="hl-fn">getNumber</span>(<span class="hl-str">"rate-limit"</span>, 100);
+}</pre>
+        </div>
+
+        <div class="sdk-panel" id="sdk-go">
+<pre><span class="hl-comment">// go get github.com/releasepace/releasepace-go</span>
+<span class="hl-kw">import</span> <span class="hl-str">"github.com/releasepace/releasepace-go/releasepace"</span>
+
+<span class="hl-var">client</span>, _ := releasepace.<span class="hl-fn">New</span>(releasepace.<span class="hl-cls">Options</span>{
+  APIKey:      <span class="hl-str">"rp_live_xxxxxxxxxxxx"</span>,
+  Environment: <span class="hl-str">"production"</span>,
+})
+<span class="hl-kw">defer</span> client.<span class="hl-fn">Close</span>()
+
+<span class="hl-kw">if</span> client.<span class="hl-fn">IsEnabled</span>(<span class="hl-str">"new-checkout"</span>) {
+  <span class="hl-fn">renderNewCheckout</span>()
+}
+
+label := client.<span class="hl-fn">GetString</span>(<span class="hl-str">"cta-label"</span>, <span class="hl-str">"Get started"</span>)
+limit := client.<span class="hl-fn">GetFloat</span>(<span class="hl-str">"rate-limit"</span>, 100)</pre>
+        </div>
+
+        <div class="sdk-panel" id="sdk-http">
+<pre><span class="hl-comment"># Any language — just one HTTP call</span>
+curl https://api.releasepace.io/api/client/features \
+  -H <span class="hl-str">"Authorization: Bearer rp_live_xxxxxxxxxxxx"</span> \
+  -G -d <span class="hl-str">"environment=production"</span>
+
+<span class="hl-comment"># Response</span>
+{
+  <span class="hl-str">"version"</span>: 1,
+  <span class="hl-str">"environment"</span>: <span class="hl-str">"production"</span>,
+  <span class="hl-str">"features"</span>: [
+    { <span class="hl-str">"key"</span>: <span class="hl-str">"new-checkout"</span>, <span class="hl-str">"enabled"</span>: <span class="hl-kw">true</span>,  <span class="hl-str">"value"</span>: <span class="hl-kw">null</span> },
+    { <span class="hl-str">"key"</span>: <span class="hl-str">"cta-label"</span>,    <span class="hl-str">"enabled"</span>: <span class="hl-kw">true</span>,  <span class="hl-str">"value"</span>: <span class="hl-str">"Get started"</span> },
+    { <span class="hl-str">"key"</span>: <span class="hl-str">"rate-limit"</span>,   <span class="hl-str">"enabled"</span>: <span class="hl-kw">false</span>, <span class="hl-str">"value"</span>: <span class="hl-kw">null</span> }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Comparison ─────────────────────────────────────────────→ -->
+<section id="compare">
+  <div class="section-inner">
+    <div class="eyebrow-small">Compare</div>
+    <h2 class="section-h2">How we stack up.</h2>
+    <p class="section-sub">The features that matter to engineering teams, side by side.</p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="width:32%">Feature</th>
+          <th class="highlight">ReleasePace</th>
+          <th>LaunchDarkly</th>
+          <th>Unleash Cloud</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Free tier</td><td class="highlight"><span class="check">✓</span> Always free</td><td><span class="partial">14-day trial</span></td><td><span class="check">✓</span> Self-host only</td></tr>
+        <tr><td>Boolean flags</td><td class="highlight"><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>String / Number / JSON flags</td><td class="highlight"><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Gradual rollouts</td><td class="highlight"><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Multi-environment</td><td class="highlight"><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Audit log</td><td class="highlight"><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="partial">Paid only</span></td></tr>
+        <tr><td>JS, Python, Java, Go SDKs</td><td class="highlight"><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>REST API (any language)</td><td class="highlight"><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Open source</td><td class="highlight"><span class="check">✓</span> MIT</td><td><span class="cross">✕</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Self-hostable</td><td class="highlight"><span class="check">✓</span></td><td><span class="cross">✕</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Edge delivery (Cloudflare)</td><td class="highlight"><span class="check">✓</span></td><td><span class="cross">✕</span></td><td><span class="cross">✕</span></td></tr>
+        <tr><td>Starting price</td><td class="highlight" style="color:var(--emerald);font-weight:600">$0</td><td>$10/seat/mo</td><td>$80/mo</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── Testimonials ───────────────────────────────────────────→ -->
+<section>
+  <div class="section-inner">
+    <div class="eyebrow-small">What teams say</div>
+    <h2 class="section-h2">Shipped with confidence.</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <p class="testimonial-text">We moved from LaunchDarkly and cut our infra bill by 90%. ReleasePace does everything we actually used, without the bloat.</p>
+        <div class="testimonial-author">
+          <div class="avatar" style="background:linear-gradient(135deg,#7B61FF,#4F9EFF)">SR</div>
+          <div><div class="author-name">Sarah R.</div><div class="author-role">CTO · Meridian Labs</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">The Go SDK integrated in an afternoon. Flags were live in production before end of day. Nothing I've used before has been this frictionless.</p>
+        <div class="testimonial-author">
+          <div class="avatar" style="background:linear-gradient(135deg,#34D399,#059669)">JK</div>
+          <div><div class="author-name">James K.</div><div class="author-role">Staff Engineer · Polygon</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">Running on Cloudflare Workers means sub-2ms flag reads from anywhere in the world. Our mobile latency improved visibly.</p>
+        <div class="testimonial-author">
+          <div class="avatar" style="background:linear-gradient(135deg,#FBBF24,#F59E0B)">ML</div>
+          <div><div class="author-name">Maya L.</div><div class="author-role">Platform Lead · Kota Systems</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pricing ────────────────────────────────────────────────→ -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="eyebrow-small">Pricing</div>
+    <h2 class="section-h2">Start free. Scale when ready.</h2>
+    <p class="section-sub">No credit card required. Host on Cloudflare + Supabase free tiers and pay nothing.</p>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0 <span>/ month</span></div>
+        <div class="plan-desc">For teams getting started. No card needed.</div>
+        <ul class="plan-features">
+          <li>Unlimited flags</li>
+          <li>3 environments</li>
+          <li>JS, Python, Java, Go SDKs</li>
+          <li>100k flag evaluations/day</li>
+          <li>7-day audit log</li>
+          <li>3 team members</li>
+        </ul>
+        <a href="/signup" class="btn btn-ghost" style="justify-content:center">Start free</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$29 <span>/ month</span></div>
+        <div class="plan-desc">For growing teams shipping fast.</div>
+        <ul class="plan-features">
+          <li>Everything in Free</li>
+          <li>Unlimited environments</li>
+          <li>10M evaluations/day</li>
+          <li>90-day audit log</li>
+          <li>15 team members</li>
+          <li>Gradual rollout controls</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="/signup" class="btn btn-primary" style="justify-content:center">Start Pro trial</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price" style="font-size:28px;letter-spacing:-0.5px">Custom</div>
+        <div class="plan-desc">SSO, SLAs, dedicated support, and compliance exports.</div>
+        <ul class="plan-features">
+          <li>Everything in Pro</li>
+          <li>SAML / SSO</li>
+          <li>Change request workflows</li>
+          <li>Unlimited members</li>
+          <li>Dedicated Slack channel</li>
+          <li>99.99% uptime SLA</li>
+          <li>SIEM audit export</li>
+        </ul>
+        <a href="mailto:enterprise@releasepace.io" class="btn btn-ghost" style="justify-content:center">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────────→ -->
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="section-h2">Your next release.<br /><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">At your pace.</span></h2>
+    <p class="section-sub" style="margin:0 auto 40px">Set up in 35 minutes. No infrastructure to manage. Free on Cloudflare + Supabase forever.</p>
+    <div class="hero-actions">
+      <a href="/signup" class="btn btn-primary btn-xl">Create your workspace →</a>
+      <a href="/docs/DEPLOY.md" class="btn btn-ghost btn-lg">Self-host guide</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────→ -->
+<footer>
+  <a href="/" class="nav-logo" style="font-size:15px">
+    <div class="nav-logo-mark" style="width:22px;height:22px;border-radius:6px">
+      <svg viewBox="0 0 14 14" fill="none" style="width:11px;height:11px"><path d="M2 2L7 5L12 2V9L7 12L2 9V2Z" fill="white" opacity="0.9"/></svg>
+    </div>
+    ReleasePace
+  </a>
+  <div class="footer-links">
+    <a href="/docs">Docs</a>
+    <a href="https://github.com/releasepace">GitHub</a>
+    <a href="/pricing">Pricing</a>
+    <a href="mailto:hello@releasepace.io">Contact</a>
+    <a href="/privacy">Privacy</a>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+    <div class="footer-copy">© 2026 ReleasePace. MIT License.</div>
+    <div style="font-size:11px;color:#4B5563;">
+      Built by
+      <a href="https://github.com/AryaaTiwari" target="_blank" rel="noopener" class="footer-author-link">Aryaa Tiwari</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/aryaa-tiwari/" target="_blank" rel="noopener" class="footer-author-link">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── Live counter animation ──────────────────────────────────
+  let evals = 1_847_293
+  let orgs  = 312
+  let ms    = 1.8
+
+  function fmt(n) {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + 'M'
+    if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'k'
+    return n.toString()
+  }
+
+  function updateCounters() {
+    // Increment realistically
+    evals += Math.floor(Math.random() * 180 + 40)
+    if (Math.random() < 0.005) orgs += 1
+    ms = Math.max(1.2, Math.min(2.4, ms + (Math.random() - 0.5) * 0.08))
+
+    document.getElementById('evalCount').textContent = fmt(evals)
+    document.getElementById('orgCount').textContent  = orgs.toString()
+    document.getElementById('latency').textContent   = ms.toFixed(1) + 'ms'
+  }
+
+  // Animate in on load
+  function animateIn(el, target, duration) {
+    const start = performance.now()
+    const from  = 0
+    function step(now) {
+      const t = Math.min((now - start) / duration, 1)
+      const ease = 1 - Math.pow(1 - t, 3)
+      if (el.id === 'evalCount') el.textContent = fmt(Math.floor(from + (target - from) * ease))
+      else if (el.id === 'orgCount') el.textContent = Math.floor(from + (target - from) * ease).toString()
+      else el.textContent = (ms * ease).toFixed(1) + 'ms'
+      if (t < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }
+
+  animateIn(document.getElementById('evalCount'), evals, 1800)
+  animateIn(document.getElementById('orgCount'),  orgs,  1400)
+  animateIn(document.getElementById('latency'),   ms,    1200)
+
+  setInterval(updateCounters, 800)
+
+  // ── SDK tabs ───────────────────────────────────────────────
+  function showSDK(lang) {
+    document.querySelectorAll('.sdk-panel').forEach(p => p.classList.remove('active'))
+    document.querySelectorAll('.sdk-tab').forEach(t => t.classList.remove('active'))
+    document.getElementById('sdk-' + lang).classList.add('active')
+    event.target.classList.add('active')
+  }
+
+  // ── Nav scroll effect ──────────────────────────────────────
+  window.addEventListener('scroll', () => {
+    document.querySelector('nav').style.borderBottomColor =
+      window.scrollY > 10 ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.05)'
+  })
+</script>
+</body>
+</html>
