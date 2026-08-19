@@ -25,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Deploy to Cloudflare Pages (production)
         if: github.ref == 'refs/heads/main'
