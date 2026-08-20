@@ -1,4 +1,4 @@
-name = "releasepace-api"
+name = "api"
 main = "src/index.ts"
 compatibility_date = "2024-02-08"
 compatibility_flags = ["nodejs_compat"]
@@ -12,9 +12,9 @@ compatibility_flags = ["nodejs_compat"]
 ALLOWED_ORIGINS = "https://app.releasepace.io,http://localhost:5173"
 
 [env.production]
-name = "releasepace-api-prod"
+name = "api-prod"
 vars = { ALLOWED_ORIGINS = "https://app.releasepace.io" }
 
 [env.preview]
-name = "releasepace-api-preview"
+name = "api-preview"
 vars = { ALLOWED_ORIGINS = "http://localhost:5173,https://preview.releasepace.io" }
