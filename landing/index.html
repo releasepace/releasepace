@@ -279,6 +279,12 @@
     .sdk-panels { position: relative; }
     .sdk-panel { display: none; }
     .sdk-panel.active { display: block; }
+    .sdk-package-link {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
+      color: var(--violet-hi); font-size: 13px; font-weight: 600;
+      text-decoration: none;
+    }
+    .sdk-package-link:hover { color: var(--text); }
 
     pre {
       background: var(--bg);
@@ -450,8 +456,8 @@
     <a href="/docs">Docs</a>
   </div>
   <div class="nav-right">
-    <a href="/login" class="btn btn-ghost">Sign in</a>
-    <a href="/signup" class="btn btn-primary">Start free →</a>
+    <a href="https://releasepace-app.pages.dev/login" class="btn btn-ghost">Sign in</a>
+    <a href="https://releasepace-app.pages.dev/signup" class="btn btn-primary">Start free →</a>
   </div>
 </nav>
 
@@ -489,7 +495,7 @@
     Toggle any feature in any app — instantly, safely, without a deploy.
   </p>
   <div class="hero-actions">
-    <a href="/signup" class="btn btn-primary btn-xl">Start for free</a>
+    <a href="https://releasepace-app.pages.dev/signup" class="btn btn-primary btn-xl">Start for free</a>
     <a href="/docs" class="btn btn-ghost btn-lg">Read the docs →</a>
   </div>
 
@@ -620,6 +626,7 @@
 
 <span class="hl-kw">const</span> <span class="hl-var">label</span> = rp.<span class="hl-fn">getString</span>(<span class="hl-str">'cta-label'</span>, <span class="hl-str">'Get started'</span>)
 <span class="hl-kw">const</span> <span class="hl-var">limit</span> = rp.<span class="hl-fn">getNumber</span>(<span class="hl-str">'rate-limit'</span>, 100)</pre>
+          <a class="sdk-package-link" href="https://www.npmjs.com/package/releasepace-js" target="_blank" rel="noopener noreferrer">View on npm ↗</a>
         </div>
 
         <div class="sdk-panel" id="sdk-react">
@@ -640,6 +647,7 @@
 
   <span class="hl-kw">return</span> newFlow ? &lt;<span class="hl-cls">NewFlow</span> label={ctaLabel} /&gt; : &lt;<span class="hl-cls">OldFlow</span> /&gt;
 }</pre>
+          <a class="sdk-package-link" href="https://www.npmjs.com/package/releasepace-js" target="_blank" rel="noopener noreferrer">View on npm ↗</a>
         </div>
 
         <div class="sdk-panel" id="sdk-python">
@@ -656,10 +664,11 @@
 
   limit = rp.<span class="hl-fn">get_number</span>(<span class="hl-str">'rate-limit'</span>, default=100)
   label = rp.<span class="hl-fn">get_string</span>(<span class="hl-str">'cta-label'</span>, default=<span class="hl-str">'Get started'</span>)</pre>
+          <a class="sdk-package-link" href="https://pypi.org/project/releasepace/" target="_blank" rel="noopener noreferrer">View on PyPI ↗</a>
         </div>
 
         <div class="sdk-panel" id="sdk-java">
-<pre><span class="hl-comment">// Maven: io.releasepace:releasepace-java:1.0.0</span>
+<pre><span class="hl-comment">// Maven: io.github.releasepace:releasepace-java:1.0.0</span>
 <span class="hl-kw">import</span> io.releasepace.<span class="hl-cls">ReleasePace</span>;
 
 <span class="hl-kw">try</span> (<span class="hl-cls">ReleasePace</span> <span class="hl-var">rp</span> = <span class="hl-cls">ReleasePace</span>.<span class="hl-fn">builder</span>()
@@ -675,6 +684,7 @@
   <span class="hl-cls">String</span> <span class="hl-var">label</span>  = rp.<span class="hl-fn">getString</span>(<span class="hl-str">"cta-label"</span>, <span class="hl-str">"Get started"</span>);
   <span class="hl-kw">double</span> <span class="hl-var">limit</span>  = rp.<span class="hl-fn">getNumber</span>(<span class="hl-str">"rate-limit"</span>, 100);
 }</pre>
+          <a class="sdk-package-link" href="https://central.sonatype.com/artifact/io.github.releasepace/releasepace-java" target="_blank" rel="noopener noreferrer">View on Maven Central ↗</a>
         </div>
 
         <div class="sdk-panel" id="sdk-go">
@@ -693,6 +703,7 @@
 
 label := client.<span class="hl-fn">GetString</span>(<span class="hl-str">"cta-label"</span>, <span class="hl-str">"Get started"</span>)
 limit := client.<span class="hl-fn">GetFloat</span>(<span class="hl-str">"rate-limit"</span>, 100)</pre>
+          <a class="sdk-package-link" href="https://pkg.go.dev/github.com/releasepace/releasepace-go" target="_blank" rel="noopener noreferrer">View on pkg.go.dev ↗</a>
         </div>
 
         <div class="sdk-panel" id="sdk-http">
@@ -802,7 +813,7 @@ curl https://api.releasepace.io/api/client/features \
           <li>7-day audit log</li>
           <li>3 team members</li>
         </ul>
-        <a href="/signup" class="btn btn-ghost" style="justify-content:center">Start free</a>
+        <a href="https://releasepace-app.pages.dev/signup" class="btn btn-ghost" style="justify-content:center">Start free</a>
       </div>
 
       <div class="pricing-card featured">
@@ -818,7 +829,7 @@ curl https://api.releasepace.io/api/client/features \
           <li>Gradual rollout controls</li>
           <li>Priority support</li>
         </ul>
-        <a href="/signup" class="btn btn-primary" style="justify-content:center">Start Pro trial</a>
+        <a href="https://releasepace-app.pages.dev/signup" class="btn btn-primary" style="justify-content:center">Start Pro trial</a>
       </div>
 
       <div class="pricing-card">
@@ -846,7 +857,7 @@ curl https://api.releasepace.io/api/client/features \
     <h2 class="section-h2">Your next release.<br /><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">At your pace.</span></h2>
     <p class="section-sub" style="margin:0 auto 40px">Set up in 35 minutes. No infrastructure to manage. Free on Cloudflare + Supabase forever.</p>
     <div class="hero-actions">
-      <a href="/signup" class="btn btn-primary btn-xl">Create your workspace →</a>
+      <a href="https://releasepace-app.pages.dev/signup" class="btn btn-primary btn-xl">Create your workspace →</a>
       <a href="/docs/DEPLOY.md" class="btn btn-ghost btn-lg">Self-host guide</a>
     </div>
   </div>

@@ -38,7 +38,7 @@ This guide covers the one-time setup per registry, and how to cut a release.
 Maven Central requires GPG signing. This is the most involved setup.
 
 1. Create Sonatype Central account at https://central.sonatype.com
-2. Claim the `io.releasepace` namespace — submit a support ticket with your GitHub org proof
+2. Verify the `io.github.releasepace` namespace in the Central Portal
 3. Generate GPG key:
    ```bash
    gpg --full-generate-key       # RSA 4096, no expiry
@@ -113,7 +113,7 @@ npm info releasepace-js version
 pip index versions releasepace
 
 # Maven
-curl https://search.maven.org/solrsearch/select?q=g:io.releasepace+a:releasepace-java
+curl https://central.sonatype.com/artifact/io.github.releasepace/releasepace-java
 
 # Go
 curl https://pkg.go.dev/github.com/releasepace/releasepace-go

@@ -13,7 +13,7 @@ Control every release. Zero infrastructure to manage. Free to start.
 [![Supabase](https://img.shields.io/badge/Backed%20by-Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![Built by Aryaa Tiwari](https://img.shields.io/badge/Built%20by-Aryaa%20Tiwari-7B61FF)](https://github.com/AryaaTiwari)
 
-[**Dashboard**](https://app.releasepace.io) · [**Docs**](https://releasepace.io/docs) · [**Landing page**](https://releasepace.io)
+[**Dashboard**](https://releasepace-app.pages.dev) · [**Docs**](https://releasepace.pages.dev/docs) · [**Landing page**](https://releasepace.pages.dev)
 
 </div>
 
@@ -34,7 +34,7 @@ Official SDKs are maintained in separate repositories. All SDKs poll the same si
 | **JavaScript / TypeScript** | [releasepace/releasepace-js](https://github.com/releasepace/releasepace-js) | [npm](https://www.npmjs.com/package/releasepace-js) | `npm install releasepace-js` |
 | **React** | [releasepace/releasepace-js](https://github.com/releasepace/releasepace-js) | [npm](https://www.npmjs.com/package/releasepace-js) | `npm install releasepace-js` |
 | **Python** | [releasepace/releasepace-python](https://github.com/releasepace/releasepace-python) | [PyPI](https://pypi.org/project/releasepace/) | `pip install releasepace` |
-| **Java** | [releasepace/releasepace-java](https://github.com/releasepace/releasepace-java) | [Maven Central](https://central.sonatype.com/artifact/io.releasepace/releasepace-java) | see below |
+| **Java** | [releasepace/releasepace-java](https://github.com/releasepace/releasepace-java) | [Maven Central](https://central.sonatype.com/artifact/io.github.releasepace/releasepace-java) | see below |
 | **Go** | [releasepace/releasepace-go](https://github.com/releasepace/releasepace-go) | [pkg.go.dev](https://pkg.go.dev/github.com/releasepace/releasepace-go) | `go get github.com/releasepace/releasepace-go` |
 | **Any language** | — | REST / HTTP | `curl` (see below) |
 
@@ -88,7 +88,7 @@ with ReleasePace(api_key='rp_live_xxx', environment='production') as rp:
 ```xml
 <!-- Maven -->
 <dependency>
-  <groupId>io.releasepace</groupId>
+  <groupId>io.github.releasepace</groupId>
   <artifactId>releasepace-java</artifactId>
   <version>1.0.0</version>
 </dependency>
@@ -146,7 +146,7 @@ curl https://api.releasepace.io/api/client/features \
 │                        Organisations                         │
 │                                                             │
 │   Admin Dashboard          SDK (any language)               │
-│   app.releasepace.io       npm / PyPI / Maven / go get      │
+│ releasepace-app.pages.dev  npm / PyPI / Maven / go get      │
 └────────────┬───────────────────────┬────────────────────────┘
              │ JWT / Admin key       │ SDK key
              ▼                       ▼
