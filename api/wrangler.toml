@@ -23,7 +23,7 @@ ALLOWED_ORIGINS = "https://app.releasepace.io,http://localhost:5173"
 
 [env.production]
 name = "api-prod"
-vars = { ALLOWED_ORIGINS = "https://app.releasepace.io" }
+vars = { ALLOWED_ORIGINS = "https://releasepace.pages.dev,https://app.releasepace.io" }
 
 [env.preview]
 name = "api-preview"
