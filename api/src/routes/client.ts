@@ -39,6 +39,17 @@ export async function handleClientFeatures(
   let environmentSlug = "";
 
   if (envSlug) {
+    if (ctx.environmentId) {
+      const { data: scopedEnvironment } = await supabase
+        .from("environments")
+        .select("slug")
+        .eq("id", ctx.environmentId)
+        .single();
+      if (!scopedEnvironment || scopedEnvironment.slug !== envSlug) {
+        return err("SDK key is not authorized for this environment", 403, corsHeaders);
+      }
+    }
+
     const { data: env } = await supabase
       .from("environments")
       .select("id, slug")
