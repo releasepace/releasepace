@@ -19,11 +19,11 @@ invocation_logs = true
 # SUPABASE_JWT_SECRET
 
 [vars]
-ALLOWED_ORIGINS = "https://releasespace-app.pages.dev,https://app.releasepace.io,http://localhost:5173"
+ALLOWED_ORIGINS = "https://app.releasepace.io,http://localhost:5173"
 
 [env.production]
 name = "api-prod"
-vars = { ALLOWED_ORIGINS = "https://releasespace-app.pages.dev,https://app.releasepace.io" }
+vars = { ALLOWED_ORIGINS = "https://releasepace-app.pages.dev,https://app.releasepace.io" }
 
 [env.preview]
 name = "api-preview"
