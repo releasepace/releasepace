@@ -46,7 +46,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages (production)
         if: github.ref == 'refs/heads/main'
-        run: npx wrangler pages deploy dist --project-name releasepace-dashboard --branch main
+        run: npx wrangler pages deploy dist --project-name dashboard --branch main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -55,7 +55,7 @@ jobs:
         if: github.event_name == 'pull_request'
         id: preview_deploy
         run: |
-          OUTPUT=$(npx wrangler pages deploy dist --project-name releasepace-dashboard --branch pr-${{ github.event.pull_request.number }} 2>&1)
+          OUTPUT=$(npx wrangler pages deploy dist --project-name dashboard --branch pr-${{ github.event.pull_request.number }} 2>&1)
           echo "$OUTPUT"
           URL=$(echo "$OUTPUT" | grep -o 'https://[^ ]*pages.dev' | head -1)
           echo "url=$URL" >> $GITHUB_OUTPUT
