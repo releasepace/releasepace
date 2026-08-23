@@ -254,7 +254,7 @@ export function AuditLogPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   {entry.actor_email && <span className="text-xs text-slate-400">{entry.actor_email}</span>}
-                  {entry.new_value && (
+                  {entry.new_value != null && (
                     <div className="text-xs text-slate-600 font-mono mt-0.5 truncate">
                       {JSON.stringify(entry.new_value)}
                     </div>

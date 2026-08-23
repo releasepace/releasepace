@@ -35,7 +35,13 @@ export function FlagDetailPage() {
     if (!flag) return
     setSaving(envId); setError(null)
     try {
-      await flagsApi.setState(flag.id, { environment_id: envId, ...patch })
+      await flagsApi.setState(flag.id, {
+        environment_id: envId,
+        enabled: patch.enabled,
+        value: patch.value,
+        strategies: patch.strategies,
+        ...(patch.rollout_pct == null ? {} : { rollout_pct: patch.rollout_pct }),
+      })
       await load()
     } catch (e: any) {
       setError(e.message)
@@ -131,7 +137,7 @@ export function FlagDetailPage() {
                       {entry.actor_email && (
                         <span className="text-xs text-slate-500 ml-2">by {entry.actor_email}</span>
                       )}
-                      {entry.new_value && (
+                      {entry.new_value != null && (
                         <div className="text-xs text-slate-600 mt-0.5 font-mono">
                           → {JSON.stringify(entry.new_value).slice(0, 80)}
                         </div>
