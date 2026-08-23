@@ -8,6 +8,9 @@ on:
       - 'sdk/java/v*'     # triggers java publish   e.g. sdk/java/v1.0.1
       - 'sdk/go/v*'       # Go is published via tag on the repo root
 
+permissions:
+  contents: write
+
 jobs:
   # ── JavaScript SDK → npm ──────────────────────────────────────
   publish-js:
@@ -19,6 +22,10 @@ jobs:
         working-directory: sdks/js
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: releasepace/releasepace-js
+          ref: main
+          path: sdks/js
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -67,6 +74,10 @@ jobs:
         working-directory: sdks/python
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: releasepace/releasepace-python
+          ref: main
+          path: sdks/python
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -101,6 +112,10 @@ jobs:
         working-directory: sdks/java
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: releasepace/releasepace-java
+          ref: main
+          path: sdks/java
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -127,7 +142,7 @@ jobs:
 
   # ── Go SDK — published automatically via GitHub tag ───────────
   # Go modules are versioned by Git tags on the repo.
-  # Tag format: sdks/go/v1.0.0
+  # Tag format: sdk/go/v1.0.0
   # pkg.go.dev indexes automatically once the tag is pushed.
   # No publish step needed — just validate it compiles.
   validate-go:
@@ -139,6 +154,10 @@ jobs:
         working-directory: sdks/go
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: releasepace/releasepace-go
+          ref: main
+          path: sdks/go
       - uses: actions/setup-go@v5
         with:
           go-version: '1.21'
