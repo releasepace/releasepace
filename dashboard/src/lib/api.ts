@@ -1,4 +1,6 @@
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8787'
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8787' : '')
+
+if (!API) throw new Error('VITE_API_URL is required for production builds')
 
 let _token: string | null = localStorage.getItem('rp_token')
 
