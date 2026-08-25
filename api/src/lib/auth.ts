@@ -36,6 +36,27 @@ export async function resolveApiKey(
   return null;
 }
 
+/** Authenticate a dashboard user before they have an organisation membership. */
+export async function resolveUnscopedJWT(
+  request: Request,
+  supabase: SupabaseClient
+): Promise<KeyContext | null> {
+  const auth = request.headers.get("Authorization");
+  if (!auth?.startsWith("Bearer ")) return null;
+
+  const { data: { user }, error } = await supabase.auth.getUser(auth.slice(7));
+  if (error || !user) return null;
+
+  return {
+    orgId: "",
+    environmentId: null,
+    keyType: "admin",
+    userId: user.id,
+    userEmail: user.email ?? null,
+    role: null,
+  };
+}
+
 async function resolveSDKKey(
   rawKey: string,
   supabase: SupabaseClient,

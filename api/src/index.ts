@@ -3,14 +3,17 @@
  * Routes: /api/client/* (SDK), /api/admin/* (dashboard)
  */
 import { createClient } from "@supabase/supabase-js";
-import { handleClientFeatures } from "./routes/client";
+import { handleClientFeatures, handleClientEvaluate } from "./routes/client";
 import { handleAdminFlags } from "./routes/admin-flags";
 import { handleAdminEnvironments } from "./routes/admin-environments";
 import { handleAdminKeys } from "./routes/admin-keys";
 import { handleAdminAudit } from "./routes/admin-audit";
+import { handleAdminSegments } from "./routes/admin-segments";
+import { handleAdminLookup } from "./routes/admin-lookup";
+import { handleAdminTeam } from "./routes/admin-team";
 import { handleAuth } from "./routes/auth";
 import { cors, json, err } from "./lib/response";
-import { resolveApiKey } from "./lib/auth";
+import { resolveApiKey, resolveUnscopedJWT } from "./lib/auth";
 
 export interface Env {
   SUPABASE_URL: string;
@@ -52,9 +55,21 @@ export default {
         return handleClientFeatures(request, supabase, keyCtx, corsHeaders);
       }
 
+      // POST /api/client/evaluate – server-side evaluation.
+      // Browser and mobile SDKs use this so targeting rules, which
+      // carry tenant identifiers, never reach an untrusted client.
+      if (path === "/api/client/evaluate" && method === "POST") {
+        const keyCtx = await resolveApiKey(request, supabase, "client");
+        if (!keyCtx) return err("Invalid or missing SDK key", 401, corsHeaders);
+        return handleClientEvaluate(request, supabase, keyCtx, corsHeaders);
+      }
+
       // ── Admin endpoints – JWT required ──────────────────────
       if (path.startsWith("/api/admin")) {
-        const keyCtx = await resolveApiKey(request, supabase, "admin");
+        let keyCtx = await resolveApiKey(request, supabase, "admin");
+        if (!keyCtx && path === "/api/admin/team/accept" && method === "POST") {
+          keyCtx = await resolveUnscopedJWT(request, supabase);
+        }
         if (!keyCtx) return err("Unauthorized", 401, corsHeaders);
 
         if (path.startsWith("/api/admin/flags")) {
@@ -65,6 +80,18 @@ export default {
         }
         if (path.startsWith("/api/admin/keys")) {
           return handleAdminKeys(request, supabase, keyCtx, corsHeaders);
+        }
+        if (path === "/api/admin/me" && method === "GET") {
+          return json({ role: keyCtx.role, org_id: keyCtx.orgId, user_id: keyCtx.userId, email: keyCtx.userEmail }, 200, corsHeaders);
+        }
+        if (path.startsWith("/api/admin/team")) {
+          return handleAdminTeam(request, supabase, keyCtx, corsHeaders);
+        }
+        if (path.startsWith("/api/admin/lookup")) {
+          return handleAdminLookup(request, supabase, keyCtx, corsHeaders);
+        }
+        if (path.startsWith("/api/admin/segments")) {
+          return handleAdminSegments(request, supabase, keyCtx, corsHeaders);
         }
         if (path.startsWith("/api/admin/audit")) {
           return handleAdminAudit(request, supabase, keyCtx, corsHeaders);
@@ -85,7 +112,7 @@ function buildCorsHeaders(allowed: string, origin: string): HeadersInit {
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type,Authorization",
+    "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Org-Id",
     "Access-Control-Max-Age": "86400",
   };
 }

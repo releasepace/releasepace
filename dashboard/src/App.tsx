@@ -1,3 +1,6 @@
+import { TeamPage, AcceptInvitePage } from './pages/Team'
+import { LookupPage } from './pages/Lookup'
+import { SegmentsPage } from './pages/Segments'
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { Sidebar } from './components/Sidebar'
@@ -28,10 +31,14 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/accept-invite" element={<AcceptInvitePage />} />
           <Route element={<AuthGuard />}>
             <Route path="/" element={<Navigate to="/flags" replace />} />
             <Route path="/flags" element={<FlagsPage />} />
             <Route path="/flags/:id" element={<FlagDetailPage />} />
+            <Route path="/lookup" element={<LookupPage />} />
+            <Route path="/team" element={<TeamPage />} />
+  <Route path="/segments" element={<SegmentsPage />} />
             <Route path="/environments" element={<EnvironmentsPage />} />
             <Route path="/keys" element={<ApiKeysPage />} />
             <Route path="/audit" element={<AuditLogPage />} />

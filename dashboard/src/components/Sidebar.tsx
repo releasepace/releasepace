@@ -1,9 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Flag, Globe, Key, ScrollText, Settings, LogOut, Zap } from 'lucide-react'
+import { Flag, Globe, Key, ScrollText, Settings, LogOut, Zap, Users, Search, UserPlus } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const nav = [
   { to: '/flags',        icon: Flag,       label: 'Flags'        },
+  { to: '/segments',     icon: Users,       label: 'Segments'     },
+  { to: '/team',         icon: UserPlus,    label: 'Team'         },
+  { to: '/lookup',       icon: Search,      label: 'Lookup'       },
   { to: '/environments', icon: Globe,       label: 'Environments' },
   { to: '/keys',         icon: Key,         label: 'API Keys'     },
   { to: '/audit',        icon: ScrollText,  label: 'Audit Log'    },
