@@ -67,6 +67,7 @@ export function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [similarOrgs, setSimilarOrgs] = useState<string[]>([])
+  const [inviteLoading, setInviteLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -74,6 +75,18 @@ export function SignupPage() {
   const returnTo = params.get('returnTo') || '/flags'
 
   const isInviteFlow = returnTo.includes('accept-invite')
+  const inviteToken = isInviteFlow
+    ? new URL(returnTo, window.location.origin).searchParams.get('token')
+    : null
+
+  useEffect(() => {
+    if (!inviteToken) return
+    setInviteLoading(true)
+    auth.invite(inviteToken)
+      .then(invite => setEmail(invite.email))
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setInviteLoading(false))
+  }, [inviteToken])
 
   // Debounced similarity check — skip entirely in invite flow since the
   // org name field is hidden and the user isn't creating a new org.
@@ -139,14 +152,22 @@ export function SignupPage() {
         )}
         <div>
           <Label required>Work email</Label>
-          <Input type="email" placeholder="you@acme.com" value={email} onChange={e => setEmail(e.target.value)} required />
+          <Input
+            type="email"
+            placeholder="you@acme.com"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            readOnly={isInviteFlow}
+            className={isInviteFlow ? 'cursor-not-allowed opacity-75' : ''}
+            required
+          />
         </div>
         <div>
           <Label required>Password</Label>
           <Input type="password" placeholder="At least 8 characters" value={password} onChange={e => setPassword(e.target.value)} minLength={8} required />
         </div>
         <ErrorMsg message={error} />
-        <Button type="submit" loading={loading} className="w-full justify-center">
+        <Button type="submit" loading={loading || inviteLoading} disabled={inviteLoading || !email} className="w-full justify-center">
           {returnTo.includes('accept-invite') ? 'Create account' : 'Create workspace'}
         </Button>
         <p className="text-center text-xs text-slate-500">

@@ -41,6 +41,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const auth = {
   checkOrg: (name: string) =>
     request<{ matches: string[] }>('GET', `/api/auth/check-org?name=${encodeURIComponent(name)}`),
+  invite: (token: string) =>
+    request<{ email: string }>('GET', `/api/auth/invite?token=${encodeURIComponent(token)}`),
   signup: (email: string, password: string, org_name?: string) =>
     request<{ access_token: string; user: User }>('POST', '/api/auth/signup', { email, password, ...(org_name ? { org_name } : {}) }),
   login: (email: string, password: string) =>

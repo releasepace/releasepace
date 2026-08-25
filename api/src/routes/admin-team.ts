@@ -277,6 +277,20 @@ export async function handleAdminTeam(
     const token = body?.token;
     if (!token) return err("token is required", 400, corsHeaders);
 
+    const { data: invite, error: inviteError } = await supabase
+      .from("pending_invites")
+      .select("email")
+      .eq("token", token)
+      .is("accepted_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+
+    if (inviteError) return err(inviteError.message, 500, corsHeaders);
+    if (!invite) return err("Invite not found or expired", 404, corsHeaders);
+    if (invite.email.trim().toLowerCase() !== ctx.userEmail?.trim().toLowerCase()) {
+      return err("This invite was sent to a different email address", 403, corsHeaders);
+    }
+
     const { data, error } = await supabase.rpc("accept_invite", {
       p_token:   token,
       p_user_id: ctx.userId,

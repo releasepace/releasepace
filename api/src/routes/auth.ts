@@ -24,6 +24,23 @@ export async function handleAuth(
     return json({ matches }, 200, corsHeaders);
   }
 
+  if (path === "/invite" && request.method === "GET") {
+    const token = url.searchParams.get("token") ?? "";
+    if (!token) return err("Invite token is required", 400, corsHeaders);
+
+    const { data: invite, error: inviteError } = await supabase
+      .from("pending_invites")
+      .select("email")
+      .eq("token", token)
+      .is("accepted_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+
+    if (inviteError) return err(inviteError.message, 500, corsHeaders);
+    if (!invite) return err("Invite not found or expired", 404, corsHeaders);
+    return json({ email: invite.email }, 200, corsHeaders);
+  }
+
   const body = await request.json() as any;
 
   // ── POST /api/auth/signup ───────────────────────────────────
