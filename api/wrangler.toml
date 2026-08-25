@@ -18,9 +18,6 @@ invocation_logs = true
 # SUPABASE_SERVICE_KEY
 # SUPABASE_JWT_SECRET
 
-[vars]
-ALLOWED_ORIGINS = "*"
-
 [env.production]
 name = "api-prod"
 
