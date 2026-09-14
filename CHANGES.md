@@ -1,5 +1,9 @@
 # Per-organisation feature targeting — full change set
 
+## Client and server SDK privacy boundary
+
+Apply migration 004 before deploying this API. Existing flags default to server-only; enable “Expose to browser and mobile SDKs” only for flags whose evaluated values are safe for end users to inspect. Backend SDKs must use rp_srv_ keys to fetch rules. Browser/mobile SDKs use rp_live_ keys and receive evaluated results only for exposed flags.
+
 API typecheck clean · 28 API tests · 25 JS SDK tests · 30 Python tests  
 Dashboard typecheck clean · `vite build` clean · Java Murmur3 verified via JRE  
 

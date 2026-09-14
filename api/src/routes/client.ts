@@ -6,17 +6,16 @@ import { evaluate, EvalContext, FlagStateInput, TargetingRule } from "../lib/eva
 /**
  * GET /api/client/features
  *
- * The single endpoint all SDKs (JS, Python, Java, Go, etc.) call.
- * Returns all non-archived flags for this org+environment with their
- * current enabled state and value.
+ * Server SDK endpoint. Returns rules for local evaluation and memberships
+ * for only the segments those rules reference.
  *
  * Supports:
  *   ?environment=production   (override env from API key)
  *   ?keys=flag-a,flag-b       (fetch only specific flags)
  *
- * Response shape (v1):
+ * Response shape (v2):
  * {
- *   "version": 1,
+ *   "version": 2,
  *   "environment": "production",
  *   "features": [
  *     { "key": "my-flag", "enabled": true, "value": null, "type": "boolean", "rollout_pct": null, "strategies": [] },
@@ -30,6 +29,10 @@ export async function handleClientFeatures(
   ctx: KeyContext,
   corsHeaders: HeadersInit
 ): Promise<Response> {
+  if (ctx.keyType !== "server") {
+    return err("Server SDK key required to download flag rules", 403, corsHeaders);
+  }
+
   const url = new URL(request.url);
   const envSlug = url.searchParams.get("environment");
   const keysParam = url.searchParams.get("keys");
@@ -115,8 +118,32 @@ export async function handleClientFeatures(
     };
   });
 
+  const referencedSegments = new Set<string>();
+  for (const feature of features) {
+    for (const rule of feature.targeting_rules) {
+      for (const condition of rule.conditions ?? []) {
+        if ((condition.op === "in_segment" || condition.op === "not_in_segment") && condition.value) {
+          referencedSegments.add(condition.value);
+        }
+      }
+    }
+  }
+
+  const segments: Record<string, string[]> = {};
+  if (referencedSegments.size) {
+    const { data: segmentRows, error: segmentError } = await supabase
+      .from("segments")
+      .select("key, segment_members(entity_key)")
+      .eq("org_id", ctx.orgId)
+      .in("key", [...referencedSegments]);
+    if (segmentError) return err(segmentError.message, 500, corsHeaders);
+    for (const segment of (segmentRows ?? []) as any[]) {
+      segments[segment.key] = (segment.segment_members ?? []).map((member: any) => member.entity_key as string);
+    }
+  }
+
   return json(
-    { version: 2, environment: environmentSlug, features },
+    { version: 2, environment: environmentSlug, features, segments },
     200,
     { ...corsHeaders, "Cache-Control": "no-store", "X-ReleasePace-Environment": environmentSlug }
   );
@@ -136,6 +163,10 @@ export async function handleClientEvaluate(
   ctx: KeyContext,
   corsHeaders: HeadersInit
 ): Promise<Response> {
+  if (ctx.keyType !== "client") {
+    return err("Client SDK key required for remote evaluation", 403, corsHeaders);
+  }
+
   let body: any;
   try {
     body = await request.json();
@@ -151,6 +182,17 @@ export async function handleClientEvaluate(
   let environmentSlug = "";
 
   if (body?.environment) {
+    if (ctx.environmentId) {
+      const { data: scopedEnvironment } = await supabase
+        .from("environments")
+        .select("slug")
+        .eq("id", ctx.environmentId)
+        .single();
+      if (!scopedEnvironment || scopedEnvironment.slug !== body.environment) {
+        return err("SDK key is not authorized for this environment", 403, corsHeaders);
+      }
+    }
+
     const { data: env } = await supabase
       .from("environments")
       .select("id, slug")
@@ -183,13 +225,14 @@ export async function handleClientEvaluate(
   let query = supabase
     .from("flags")
     .select(
-      `key, type,
+      `key, name, type,
        flag_states!inner(
          enabled, value, rollout_pct, bucket_by, targeting_rules, environment_id
        )`
     )
     .eq("org_id", ctx.orgId)
     .eq("archived", false)
+    .eq("client_side", true)
     .eq("flag_states.environment_id", environmentId);
 
   if (Array.isArray(body?.keys) && body.keys.length) query = query.in("key", body.keys);
@@ -197,6 +240,7 @@ export async function handleClientEvaluate(
   const { data: flags, error } = await query;
   if (error) return err(error.message, 500, corsHeaders);
 
+  const flagMetadata = new Map((flags ?? []).map((f: any) => [f.key, { name: f.name, type: f.type }]));
   const states: FlagStateInput[] = (flags ?? []).map((f: any) => {
     const s = Array.isArray(f.flag_states) ? f.flag_states[0] : f.flag_states;
     return {
@@ -223,11 +267,12 @@ export async function handleClientEvaluate(
 
   const segmentIndex: Record<string, Set<string>> = {};
   if (referencedSegments.size > 0) {
-    const { data: segs } = await supabase
+    const { data: segs, error: segmentError } = await supabase
       .from("segments")
       .select("key, segment_members(entity_key)")
       .eq("org_id", ctx.orgId)
       .in("key", [...referencedSegments]);
+    if (segmentError) return err(segmentError.message, 500, corsHeaders);
     for (const seg of (segs ?? []) as any[]) {
       segmentIndex[seg.key] = new Set(
         (seg.segment_members ?? []).map((m: any) => m.entity_key as string)
@@ -237,7 +282,7 @@ export async function handleClientEvaluate(
 
   const features = states.map((s) => {
     const r = evaluate(s, evalContext, segmentIndex);
-    return { key: r.key, enabled: r.enabled, value: r.value, reason: r.reason };
+    return { key: r.key, ...flagMetadata.get(r.key), enabled: r.enabled, value: r.value, reason: r.reason };
   });
 
   const missingAttrs = [

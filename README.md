@@ -27,7 +27,9 @@ ReleasePace is an open source feature flag platform — a free, self-hostable al
 
 ## SDKs
 
-Official SDKs are maintained in separate repositories. All SDKs poll the same single REST endpoint — you build the API once and every language just works.
+Official SDKs are maintained in separate repositories and share the same API. Backend SDKs poll flag rules for local evaluation; browser and mobile SDKs request evaluations from the API.
+
+Use an rp_srv_ server key in backend SDKs to download and locally evaluate rules. Use an rp_live_ client key in browser/mobile SDKs; those SDKs receive evaluations only for flags explicitly exposed to clients in the dashboard.
 
 | Language | Repository | Registry | Install |
 |---|---|---|---|
@@ -45,7 +47,7 @@ npm install releasepace-js
 ```ts
 import { ReleasePace } from 'releasepace-js'
 
-const rp = new ReleasePace({ apiKey: 'rp_live_xxx', environment: 'production' })
+const rp = new ReleasePace({ apiKey: 'rp_srv_xxx', environment: 'production' })
 await rp.connect()
 
 if (rp.isEnabled('new-checkout')) { ... }
@@ -78,7 +80,7 @@ pip install releasepace
 ```python
 from releasepace import ReleasePace
 
-with ReleasePace(api_key='rp_live_xxx', environment='production') as rp:
+with ReleasePace(api_key='rp_srv_xxx', environment='production') as rp:
     if rp.is_enabled('new-checkout'):
         render_new_checkout()
     label = rp.get_string('cta-label', default='Get started')
@@ -95,7 +97,7 @@ with ReleasePace(api_key='rp_live_xxx', environment='production') as rp:
 ```
 ```java
 try (ReleasePace rp = ReleasePace.builder()
-        .apiKey("rp_live_xxx")
+        .apiKey("rp_srv_xxx")
         .environment("production")
         .build().connect()) {
 
@@ -110,7 +112,7 @@ go get github.com/releasepace/releasepace-go
 ```
 ```go
 client, _ := releasepace.New(releasepace.Options{
-    APIKey:      "rp_live_xxx",
+    APIKey:      "rp_srv_xxx",
     Environment: "production",
 })
 defer client.Close()
@@ -122,12 +124,12 @@ label := client.GetString("cta-label", "Get started")
 ### Quick start — Any language (REST)
 ```bash
 curl https://api.releasepace.io/api/client/features \
-  -H "Authorization: Bearer rp_live_xxx" \
+  -H "Authorization: Bearer rp_srv_xxx" \
   -G -d "environment=production"
 ```
 ```json
 {
-  "version": 1,
+  "version": 2,
   "environment": "production",
   "features": [
     { "key": "new-checkout", "enabled": true,  "value": null },

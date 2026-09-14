@@ -11,7 +11,8 @@ export interface KeyContext {
 
 /**
  * Resolves either:
- *  - Bearer rp_live_xxx  → SDK/admin API key
+ *  - Bearer rp_live_xxx  → client SDK key (remote evaluation only)
+ *  - Bearer rp_srv_xxx   → server SDK key (local ruleset evaluation)
  *  - Bearer <JWT>        → Supabase user session (for dashboard)
  */
 export async function resolveApiKey(

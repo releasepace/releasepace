@@ -197,8 +197,8 @@ export function ApiKeysPage() {
           <FormGroup>
             <Label>Type</Label>
             <Select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-              <option value="client">Client — for browser/mobile SDKs</option>
-              <option value="server">Server — for backend SDKs</option>
+              <option value="client">Client — remote evaluation for exposed browser/mobile flags</option>
+              <option value="server">Server — downloads rules for backend evaluation</option>
               <option value="admin">Admin — for management API</option>
             </Select>
           </FormGroup>
@@ -331,15 +331,15 @@ if (rp.isEnabled('my-flag')) { ... }
 
 # Python
 from releasepace import ReleasePace
-with ReleasePace(api_key='rp_live_xxx') as rp:
+with ReleasePace(api_key='rp_srv_xxx') as rp:
     if rp.is_enabled('my-flag'): ...
 
 // Java
-ReleasePace rp = ReleasePace.builder().apiKey("rp_live_xxx").build().connect();
+ReleasePace rp = ReleasePace.builder().apiKey("rp_srv_xxx").build().connect();
 if (rp.isEnabled("my-flag")) { ... }
 
 // Go
-client, _ := releasepace.New(releasepace.Options{APIKey: "rp_live_xxx"})
+client, _ := releasepace.New(releasepace.Options{APIKey: "rp_srv_xxx"})
 defer client.Close()
 if client.IsEnabled("my-flag") { ... }`}
         </pre>

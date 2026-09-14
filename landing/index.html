@@ -655,7 +655,7 @@
 <span class="hl-kw">from</span> releasepace <span class="hl-kw">import</span> <span class="hl-cls">ReleasePace</span>
 
 <span class="hl-kw">with</span> <span class="hl-cls">ReleasePace</span>(
-  api_key=<span class="hl-str">'rp_live_xxxxxxxxxxxx'</span>,
+  api_key=<span class="hl-str">'rp_srv_xxxxxxxxxxxx'</span>,
   environment=<span class="hl-str">'production'</span>,
 ) <span class="hl-kw">as</span> rp:
 
@@ -672,7 +672,7 @@
 <span class="hl-kw">import</span> io.releasepace.<span class="hl-cls">ReleasePace</span>;
 
 <span class="hl-kw">try</span> (<span class="hl-cls">ReleasePace</span> <span class="hl-var">rp</span> = <span class="hl-cls">ReleasePace</span>.<span class="hl-fn">builder</span>()
-    .<span class="hl-fn">apiKey</span>(<span class="hl-str">"rp_live_xxxxxxxxxxxx"</span>)
+    .<span class="hl-fn">apiKey</span>(<span class="hl-str">"rp_srv_xxxxxxxxxxxx"</span>)
     .<span class="hl-fn">environment</span>(<span class="hl-str">"production"</span>)
     .<span class="hl-fn">build</span>()
     .<span class="hl-fn">connect</span>()) {
@@ -692,7 +692,7 @@
 <span class="hl-kw">import</span> <span class="hl-str">"github.com/releasepace/releasepace-go/releasepace"</span>
 
 <span class="hl-var">client</span>, _ := releasepace.<span class="hl-fn">New</span>(releasepace.<span class="hl-cls">Options</span>{
-  APIKey:      <span class="hl-str">"rp_live_xxxxxxxxxxxx"</span>,
+  APIKey:      <span class="hl-str">"rp_srv_xxxxxxxxxxxx"</span>,
   Environment: <span class="hl-str">"production"</span>,
 })
 <span class="hl-kw">defer</span> client.<span class="hl-fn">Close</span>()
@@ -709,7 +709,7 @@ limit := client.<span class="hl-fn">GetFloat</span>(<span class="hl-str">"rate-l
         <div class="sdk-panel" id="sdk-http">
 <pre><span class="hl-comment"># Any language — just one HTTP call</span>
 curl https://api.releasepace.io/api/client/features \
-  -H <span class="hl-str">"Authorization: Bearer rp_live_xxxxxxxxxxxx"</span> \
+  -H <span class="hl-str">"Authorization: Bearer rp_srv_xxxxxxxxxxxx"</span> \
   -G -d <span class="hl-str">"environment=production"</span>
 
 <span class="hl-comment"># Response</span>

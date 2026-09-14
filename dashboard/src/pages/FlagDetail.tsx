@@ -62,6 +62,19 @@ export function FlagDetailPage() {
     }
   }
 
+  async function handleClientSideChange(client_side: boolean) {
+    if (!flag) return
+    setSaving('client-side'); setError(null)
+    try {
+      await flagsApi.update(flag.id, { client_side })
+      await load()
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSaving(null)
+    }
+  }
+
   if (loading) return <div className="flex justify-center py-32"><Spinner size={24} /></div>
   if (!flag) return <div className="p-8 text-slate-500 text-sm">Flag not found.</div>
 
@@ -103,6 +116,16 @@ export function FlagDetailPage() {
       </div>
 
       <ErrorMsg message={error} />
+
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm text-slate-200">Expose to browser and mobile SDKs</p>
+            <p className="text-xs text-slate-500 mt-1">Client SDKs receive evaluated values for this flag. Keep off if its result reveals private product or customer information.</p>
+          </div>
+          <Toggle checked={flag.client_side} disabled={!canWrite || saving === 'client-side'} onChange={handleClientSideChange} />
+        </div>
+      </Card>
 
       {/* Per-environment cards */}
       <div>

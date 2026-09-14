@@ -111,6 +111,10 @@ export async function handleAdminFlags(
     if (!WRITE_ROLES.includes(ctx.role ?? "")) return err("Forbidden", 403, corsHeaders);
     const body = await request.json() as any;
     const { key, name, description, type, tags } = body;
+    if (body.client_side !== undefined && typeof body.client_side !== "boolean") {
+      return err("client_side must be a boolean", 400, corsHeaders);
+    }
+    const clientSide = body.client_side === true;
 
     if (!key || !name) return err("key and name are required", 400, corsHeaders);
     if (!/^[a-z0-9-]+$/.test(key)) return err("key must be lowercase letters, numbers, hyphens", 400, corsHeaders);
@@ -118,7 +122,7 @@ export async function handleAdminFlags(
     // Create flag
     const { data: flag, error: flagErr } = await supabase
       .from("flags")
-      .insert({ org_id: ctx.orgId, key, name, description, type: type || "boolean", tags: tags || [], created_by: ctx.userId })
+      .insert({ org_id: ctx.orgId, key, name, description, type: type || "boolean", tags: tags || [], client_side: clientSide, created_by: ctx.userId })
       .select()
       .single();
 
@@ -161,7 +165,10 @@ export async function handleAdminFlags(
   if (flagId && !sub && method === "PATCH") {
     if (!WRITE_ROLES.includes(ctx.role ?? "")) return err("Forbidden", 403, corsHeaders);
     const body = await request.json() as any;
-    const allowed = ["name", "description", "tags", "archived"];
+    if (body.client_side !== undefined && typeof body.client_side !== "boolean") {
+      return err("client_side must be a boolean", 400, corsHeaders);
+    }
+    const allowed = ["name", "description", "tags", "archived", "client_side"];
     const update = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)));
 
     const { data: old } = await supabase.from("flags").select().eq("id", flagId).eq("org_id", ctx.orgId).single();

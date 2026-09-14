@@ -168,7 +168,7 @@ export interface Organisation { id: string; name: string; slug: string; plan: st
 export interface Flag {
   id: string; org_id: string; key: string; name: string
   description: string; type: 'boolean' | 'string' | 'number' | 'json'
-  tags: string[]; archived: boolean
+  tags: string[]; archived: boolean; client_side: boolean
   created_at: string; updated_at: string
   flag_states?: FlagState[]
 }
@@ -241,7 +241,7 @@ export interface AuditEntry {
 }
 
 export interface CreateFlagBody {
-  key: string; name: string; type: string; description?: string; tags?: string[]
+  key: string; name: string; type: string; description?: string; tags?: string[]; client_side?: boolean
 }
 
 export interface SetStateBody {

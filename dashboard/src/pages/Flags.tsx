@@ -171,6 +171,7 @@ function CreateFlagModal({ open, onClose, onCreated }: { open: boolean; onClose:
   const [name, setName] = useState('')
   const [type, setType] = useState('boolean')
   const [desc, setDesc] = useState('')
+  const [clientSide, setClientSide] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -185,8 +186,8 @@ function CreateFlagModal({ open, onClose, onCreated }: { open: boolean; onClose:
     if (!/^[a-z0-9-]+$/.test(key)) { setError('Key must be lowercase letters, numbers, and hyphens'); return }
     setLoading(true); setError(null)
     try {
-      await flagsApi.create({ key, name, type, description: desc })
-      setKey(''); setName(''); setType('boolean'); setDesc('')
+      await flagsApi.create({ key, name, type, description: desc, client_side: clientSide })
+      setKey(''); setName(''); setType('boolean'); setDesc(''); setClientSide(false)
       onCreated()
     } catch (e: any) {
       setError(e.message)
@@ -220,6 +221,13 @@ function CreateFlagModal({ open, onClose, onCreated }: { open: boolean; onClose:
           <Label>Description</Label>
           <Textarea placeholder="What does this flag control?" value={desc} onChange={e => setDesc(e.target.value)} rows={2} />
         </FormGroup>
+        <label className="flex items-start gap-3 rounded-lg border border-slate-800 p-3 cursor-pointer">
+          <input type="checkbox" checked={clientSide} onChange={e => setClientSide(e.target.checked)} className="mt-0.5 accent-violet-500" />
+          <span>
+            <span className="block text-sm text-slate-200">Expose to browser and mobile SDKs</span>
+            <span className="block text-xs text-slate-500 mt-0.5">Only enable this when the flag's values and targeting outcomes are safe for end users to see.</span>
+          </span>
+        </label>
         <ErrorMsg message={error} />
         <div className="flex gap-3 pt-1">
           <Button onClick={handleSubmit} loading={loading} className="flex-1 justify-center">Create flag</Button>

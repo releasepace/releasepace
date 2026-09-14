@@ -204,12 +204,13 @@ TOKEN=$(curl -s -X POST $API/api/auth/login \
 # If you didn't save the env IDs from signup, list them now
 curl -s $API/api/admin/environments -H "Authorization: Bearer $TOKEN" | jq
 
-# Create a client key scoped to production
+# Create a server key scoped to production for backend SDKs and rule downloads.
+# Create a separate client key (type "client") for browser/mobile SDKs.
 curl -X POST $API/api/admin/keys \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Production SDK key","type":"client","environment_id":"<prod-env-id>"}'
-# → raw_key: rp_live_abc123... (shown ONCE — copy it now)
+  -d '{"name":"Production server key","type":"server","environment_id":"<prod-env-id>"}'
+# → raw_key: rp_srv_abc123... (shown ONCE — copy it now)
 ```
 
 ---
@@ -223,7 +224,7 @@ Do this loop once to prove everything is wired up:
 3. **Read it from an SDK or plain HTTP:**
    ```bash
    curl $API/api/client/features \
-     -H "Authorization: Bearer rp_live_abc123..." \
+     -H "Authorization: Bearer rp_srv_abc123..." \
      -G -d "environment=production"
    ```
    You should see `test-flag: true` in the response.
