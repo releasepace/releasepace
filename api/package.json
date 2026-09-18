@@ -1,6 +1,7 @@
 {
   "name": "api",
   "version": "1.0.0",
+  "author": "Aryaa Tiwari <meet.aryaa.tiwari@gmail.com> (https://aryaatiwari.github.io/)",
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
