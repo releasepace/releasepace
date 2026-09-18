@@ -1,6 +1,7 @@
 -- ─────────────────────────────────────────────────────────────
 -- ReleasePace schema  –  001_initial_schema.sql
 -- Run in Supabase SQL editor or via supabase db push
+-- Copyright (c) 2026 Aryaa Tiwari. All rights reserved.
 -- ─────────────────────────────────────────────────────────────
 
 -- Extensions
