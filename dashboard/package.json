@@ -1,6 +1,7 @@
 {
   "name": "dashboard",
   "version": "1.0.0",
+  "author": "Aryaa Tiwari <meet.aryaa.tiwari@gmail.com> (https://aryaatiwari.github.io/)",
   "private": true,
   "type": "module",
   "scripts": {

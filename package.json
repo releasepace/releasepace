@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "ReleasePace — production-grade feature flag platform",
+  "author": "Aryaa Tiwari <meet.aryaa.tiwari@gmail.com> (https://aryaatiwari.github.io/)",
   "scripts": {
     "setup":          "bash scripts/setup.sh",
     "dev:api":        "cd api && npm run dev",

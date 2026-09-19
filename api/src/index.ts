@@ -1,6 +1,8 @@
 /**
  * ReleasePace API – Cloudflare Worker
  * Routes: /api/client/* (SDK), /api/admin/* (dashboard)
+ * Copyright (c) 2026 Aryaa Tiwari. All rights reserved.
+ * Licensed under the MIT License.
  */
 import { createClient } from "@supabase/supabase-js";
 import { handleClientFeatures, handleClientEvaluate } from "./routes/client";
