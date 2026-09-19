@@ -123,7 +123,7 @@ label := client.GetString("cta-label", "Get started")
 
 ### Quick start — Any language (REST)
 ```bash
-curl https://api.releasepace.io/api/client/features \
+curl https://api-prod.releasepace.workers.dev/api/client/features \
   -H "Authorization: Bearer rp_srv_xxx" \
   -G -d "environment=production"
 ```
@@ -154,7 +154,7 @@ curl https://api.releasepace.io/api/client/features \
              ▼                       ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Cloudflare Workers API (Edge)                   │
-│              api.releasepace.io                             │
+│       api-prod.releasepace.workers.dev                      │
 │                                                             │
 │   POST /api/auth/signup      GET  /api/client/features      │
 │   POST /api/auth/login       POST /api/admin/flags          │

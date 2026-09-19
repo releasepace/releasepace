@@ -13,7 +13,7 @@ All secrets are set under:
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → right sidebar | All deploy workflows |
 | `SUPABASE_ACCESS_TOKEN` | Supabase dashboard → Account → Access Tokens | Migration workflow |
 | `SUPABASE_STAGING_PROJECT_REF` | Supabase project URL: `https://[ref].supabase.co` | Migration workflow |
-| `PROD_API_URL` | Your deployed Worker URL e.g. `https://api.releasepace.io` | Dashboard deploy |
+| `PROD_API_URL` | Your deployed Worker URL e.g. `https://api-prod.releasepace.workers.dev` | Dashboard deploy |
 | `PREVIEW_API_URL` | Preview Worker URL e.g. `https://releasepace-api-preview.workers.dev` | Dashboard deploy |
 
 ## Optional secrets

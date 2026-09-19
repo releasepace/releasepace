@@ -47,7 +47,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run build
         env:
-          VITE_API_URL: https://api.releasepace.io
+          VITE_API_URL: https://api-prod.releasepace.workers.dev
 
   # ── DB migration syntax check ──────────────────────────────────
   # SDKs live in their own repos (releasepace-js, releasepace-python,
