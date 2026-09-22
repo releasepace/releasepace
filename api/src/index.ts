@@ -7,6 +7,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { handleClientFeatures, handleClientEvaluate } from "./routes/client";
 import { handleAdminFlags } from "./routes/admin-flags";
+import { handleAdminApps } from "./routes/admin-apps";
 import { handleAdminEnvironments } from "./routes/admin-environments";
 import { handleAdminKeys } from "./routes/admin-keys";
 import { handleAdminAudit } from "./routes/admin-audit";
@@ -76,6 +77,9 @@ export default {
 
         if (path.startsWith("/api/admin/flags")) {
           return handleAdminFlags(request, supabase, keyCtx, corsHeaders);
+        }
+        if (path.startsWith("/api/admin/apps")) {
+          return handleAdminApps(request, supabase, keyCtx, corsHeaders);
         }
         if (path.startsWith("/api/admin/environments")) {
           return handleAdminEnvironments(request, supabase, keyCtx, corsHeaders);

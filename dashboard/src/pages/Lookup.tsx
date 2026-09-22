@@ -207,7 +207,7 @@ export function LookupPage() {
   const offCount = result?.flags.filter(f => !f.enabled).length ?? 0
 
   return (
-    <div className="space-y-4">
+    <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-4">
       <div>
         <h1 className="text-lg font-medium text-slate-100">Lookup</h1>
         <p className="text-xs text-slate-500 mt-0.5">
@@ -358,6 +358,7 @@ function LookupRow({ flag, context }: { flag: LookupFlag; context: Record<string
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-200 truncate">{flag.name}</span>
             <code className="text-[10px] text-slate-600 font-mono hidden sm:inline truncate">{flag.key}</code>
+            {flag.app_name && <Badge variant="slate">{flag.app_name}</Badge>}
           </div>
           <p className={`text-xs mt-0.5 truncate ${isMissing ? 'text-amber-400' : 'text-slate-500'}`}>
             {explanation}

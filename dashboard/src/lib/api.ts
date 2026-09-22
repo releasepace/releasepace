@@ -51,11 +51,13 @@ export const auth = {
 
 // ── Flags ─────────────────────────────────────────────────────
 export const flags = {
-  list: (params?: { q?: string; archived?: boolean; page?: number }) => {
+  list: (params?: { q?: string; archived?: boolean; page?: number; limit?: number; app_id?: string }) => {
     const qs = new URLSearchParams()
     if (params?.q) qs.set('q', params.q)
     if (params?.archived) qs.set('archived', 'true')
     if (params?.page) qs.set('page', String(params.page))
+    if (params?.limit) qs.set('limit', String(params.limit))
+    if (params?.app_id) qs.set('app_id', params.app_id)
     return request<{ flags: Flag[]; total: number }>('GET', `/api/admin/flags?${qs}`)
   },
   get: (id: string) => request<Flag>('GET', `/api/admin/flags/${id}`),
@@ -63,6 +65,13 @@ export const flags = {
   update: (id: string, body: Partial<Flag>) => request<Flag>('PATCH', `/api/admin/flags/${id}`, body),
   setState: (id: string, body: SetStateBody) => request<FlagState>('PUT', `/api/admin/flags/${id}/state`, body),
   archive: (id: string) => request<{ archived: boolean }>('DELETE', `/api/admin/flags/${id}`),
+}
+
+export const apps = {
+  list: () => request<App[]>('GET', '/api/admin/apps'),
+  create: (name: string) => request<App>('POST', '/api/admin/apps', { name }),
+  update: (id: string, name: string) => request<App>('PATCH', `/api/admin/apps/${id}`, { name }),
+  delete: (id: string) => request<{ deleted: boolean }>('DELETE', `/api/admin/apps/${id}`),
 }
 
 // ── Environments ──────────────────────────────────────────────
@@ -78,6 +87,7 @@ export const environments = {
 // ── API Keys ──────────────────────────────────────────────────
 export interface LookupFlag {
   key: string; name: string; type: string
+  app_id?: string | null; app_name?: string | null
   enabled: boolean; value: unknown
   reason: string
   rule_id?: string
@@ -170,8 +180,12 @@ export interface Flag {
   description: string; type: 'boolean' | 'string' | 'number' | 'json'
   tags: string[]; archived: boolean; client_side: boolean
   created_at: string; updated_at: string
+  app_id: string | null
+  apps?: App | null
   flag_states?: FlagState[]
 }
+
+export interface App { id: string; org_id: string; name: string; slug: string; created_at: string; updated_at: string }
 
 export type BucketBy = 'userId' | 'tenantId'
 
@@ -238,10 +252,11 @@ export interface AuditEntry {
   environment_id: string | null; action: string
   actor_email: string | null; old_value: unknown
   new_value: unknown; created_at: string
+  app_name?: string | null
 }
 
 export interface CreateFlagBody {
-  key: string; name: string; type: string; description?: string; tags?: string[]; client_side?: boolean
+  key: string; name: string; type: string; description?: string; tags?: string[]; client_side?: boolean; app_id?: string | null
 }
 
 export interface SetStateBody {

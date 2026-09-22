@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Save, Trash2, ChevronDown, ChevronUp, Plus, X, Users, User } from 'lucide-react'
 import { flags as flagsApi, audit as auditApi, segments as segmentsApi,
-  Flag, FlagState, AuditEntry, Segment, BucketBy, TargetingRule } from '../lib/api'
+  apps as appsApi, App, Flag, FlagState, AuditEntry, Segment, BucketBy, TargetingRule } from '../lib/api'
 import { useRole } from '../context/AuthContext'
 import { Button, Toggle, Badge, TypeBadge, ColorDot, Input, Select, Textarea, Label, FormGroup, ErrorMsg, Spinner, Card } from '../components/ui'
 import { formatDistanceToNow } from 'date-fns'
@@ -17,11 +17,15 @@ export function FlagDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [showAudit, setShowAudit] = useState(false)
   const [allSegments, setAllSegments] = useState<Segment[]>([])
+  const [apps, setApps] = useState<App[]>([])
 
   useEffect(() => {
     segmentsApi.list()
       .then(r => setAllSegments(r.segments))
       .catch(() => setAllSegments([]))
+    appsApi.list()
+      .then(setApps)
+      .catch(() => setApps([]))
   }, [])
 
   async function load() {
@@ -67,6 +71,19 @@ export function FlagDetailPage() {
     setSaving('client-side'); setError(null)
     try {
       await flagsApi.update(flag.id, { client_side })
+      await load()
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  async function handleAppChange(app_id: string) {
+    if (!flag || !app_id) return
+    setSaving('app'); setError(null)
+    try {
+      await flagsApi.update(flag.id, { app_id })
       await load()
     } catch (e: any) {
       setError(e.message)
@@ -124,6 +141,24 @@ export function FlagDetailPage() {
             <p className="text-xs text-slate-500 mt-1">Client SDKs receive evaluated values for this flag. Keep off if its result reveals private product or customer information.</p>
           </div>
           <Toggle checked={flag.client_side} disabled={!canWrite || saving === 'client-side'} onChange={handleClientSideChange} />
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm text-slate-200">App</p>
+            <p className="text-xs text-slate-500 mt-1">Group this flag with the application that owns it.</p>
+          </div>
+          <Select
+            value={flag.app_id ?? ''}
+            onChange={e => handleAppChange(e.target.value)}
+            disabled={!canWrite || saving === 'app' || apps.length === 0}
+            className="w-56"
+          >
+            <option value="" disabled>{apps.length ? 'Select an app' : 'No apps available'}</option>
+            {apps.map(app => <option key={app.id} value={app.id}>{app.name}</option>)}
+          </Select>
         </div>
       </Card>
 

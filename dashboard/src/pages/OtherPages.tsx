@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, Copy, Check, Eye, EyeOff, Globe, Key, ScrollText, Settings as SettingsIcon } from 'lucide-react'
+import { Plus, Trash2, Copy, Check, Eye, EyeOff, Globe, Key, ScrollText, Settings as SettingsIcon, Pencil } from 'lucide-react'
 import { environments as envApi, apiKeys as keysApi, audit as auditApi, Environment, ApiKey, AuditEntry } from '../lib/api'
 import { Button, Badge, Input, Select, Label, FormGroup, ErrorMsg, Modal, Empty, Spinner, Card, ColorDot } from '../components/ui'
 import { formatDistanceToNow, format } from 'date-fns'
@@ -10,6 +10,7 @@ export function EnvironmentsPage() {
   const [envList, setEnvList] = useState<Environment[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
+  const [editing, setEditing] = useState<Environment | null>(null)
   const [name, setName] = useState(''); const [slug, setSlug] = useState(''); const [color, setColor] = useState('#6366f1')
   const [error, setError] = useState<string | null>(null); const [saving, setSaving] = useState(false)
 
@@ -39,6 +40,15 @@ export function EnvironmentsPage() {
     try { await envApi.delete(id); load() } catch (e: any) { alert(e.message) }
   }
 
+  async function handleUpdate(env: Environment, name: string, color: string) {
+    setSaving(true); setError(null)
+    try {
+      const updated = await envApi.update(env.id, { name, color })
+      setEnvList(list => list.map(item => item.id === updated.id ? updated : item))
+      setEditing(null)
+    } catch (e: any) { setError(e.message) } finally { setSaving(false) }
+  }
+
   const COLORS = ['#6366f1','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6']
 
   return (
@@ -64,10 +74,14 @@ export function EnvironmentsPage() {
                   <code className="text-xs text-slate-500">{env.slug}</code>
                 </div>
               </div>
-              {!env.protected && (
-                <Button variant="danger" size="sm" icon={<Trash2 size={12} />}
-                  onClick={() => handleDelete(env.id, env.name)}>Delete</Button>
-              )}
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" icon={<Pencil size={12} />}
+                  onClick={() => setEditing(env)}>Edit</Button>
+                {!env.protected && (
+                  <Button variant="danger" size="sm" icon={<Trash2 size={12} />}
+                    onClick={() => handleDelete(env.id, env.name)}>Delete</Button>
+                )}
+              </div>
             </Card>
           ))}
           {envList.length === 0 && <Empty icon={<Globe size={36} />} title="No environments" description="Create environments to manage flag states separately." />}
@@ -95,7 +109,62 @@ export function EnvironmentsPage() {
           </div>
         </div>
       </Modal>
+      <EditEnvironmentModal
+        environment={editing}
+        colors={COLORS}
+        saving={saving}
+        error={error}
+        onClose={() => { setEditing(null); setError(null) }}
+        onSave={handleUpdate}
+      />
     </PageShell>
+  )
+}
+
+function EditEnvironmentModal({ environment, colors, saving, error, onClose, onSave }: {
+  environment: Environment | null
+  colors: string[]
+  saving: boolean
+  error: string | null
+  onClose: () => void
+  onSave: (environment: Environment, name: string, color: string) => void
+}) {
+  const [name, setName] = useState('')
+  const [color, setColor] = useState('#6366f1')
+
+  useEffect(() => {
+    if (environment) {
+      setName(environment.name)
+      setColor(environment.color)
+    }
+  }, [environment])
+
+  return (
+    <Modal open={!!environment} onClose={onClose} title="Edit environment">
+      <div className="space-y-4">
+        <FormGroup><Label required>Name</Label><Input value={name} onChange={e => setName(e.target.value)} /></FormGroup>
+        <FormGroup>
+          <Label>Slug</Label>
+          <Input value={environment?.slug || ''} disabled className="font-mono" />
+          <p className="text-xs text-slate-600 mt-1">Slug is used by SDKs and cannot be changed.</p>
+        </FormGroup>
+        <FormGroup>
+          <Label>Color</Label>
+          <div className="flex gap-2 flex-wrap">
+            {colors.map(c => (
+              <button key={c} type="button" onClick={() => setColor(c)}
+                className={`w-7 h-7 rounded-lg transition-all ${color === c ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110' : ''}`}
+                style={{ background: c }} />
+            ))}
+          </div>
+        </FormGroup>
+        <ErrorMsg message={error} />
+        <div className="flex gap-3 pt-1">
+          <Button onClick={() => environment && onSave(environment, name, color)} loading={saving} className="flex-1 justify-center">Save changes</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -253,7 +322,10 @@ export function AuditLogPage() {
                   {entry.action}
                 </div>
                 <div className="flex-1 min-w-0">
-                  {entry.actor_email && <span className="text-xs text-slate-400">{entry.actor_email}</span>}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {entry.actor_email && <span className="text-xs text-slate-400">{entry.actor_email}</span>}
+                    {entry.app_name && <Badge variant="slate">{entry.app_name}</Badge>}
+                  </div>
                   {entry.new_value != null && (
                     <div className="text-xs text-slate-600 font-mono mt-0.5 truncate">
                       {JSON.stringify(entry.new_value)}

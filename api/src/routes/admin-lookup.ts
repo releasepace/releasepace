@@ -28,6 +28,8 @@ interface LookupFlag {
   key: string;
   name: string;
   type: string;
+  app_id?: string | null;
+  app_name?: string | null;
   enabled: boolean;
   value: unknown;
   reason: string;
@@ -100,7 +102,7 @@ export async function handleAdminLookup(
   const { data: rows, error } = await supabase
     .from("flags")
     .select(
-      `key, name, type,
+      `key, name, type, app_id,
        flag_states!inner(enabled, value, rollout_pct, bucket_by, targeting_rules, environment_id)`
     )
     .eq("org_id", ctx.orgId)
@@ -109,6 +111,18 @@ export async function handleAdminLookup(
     .order("key");
 
   if (error) return err(error.message, 500, corsHeaders);
+
+  const appIds = [...new Set((rows ?? []).map((row: any) => row.app_id).filter(Boolean))];
+  const appNameById = new Map<string, string>();
+  if (appIds.length) {
+    const { data: appRows, error: appError } = await supabase
+      .from("apps")
+      .select("id, name")
+      .eq("org_id", ctx.orgId)
+      .in("id", appIds);
+    if (appError) return err(appError.message, 500, corsHeaders);
+    for (const app of appRows ?? []) appNameById.set(app.id, app.name);
+  }
 
   const states: FlagStateInput[] = (rows ?? []).map((row: any) => {
     const s = Array.isArray(row.flag_states) ? row.flag_states[0] : row.flag_states;
@@ -158,6 +172,8 @@ export async function handleAdminLookup(
       key: state.key,
       name: nameByKey.get(state.key) ?? state.key,
       type: state.type,
+      app_id: (rows ?? []).find((row: any) => row.key === state.key)?.app_id ?? null,
+      app_name: appNameById.get((rows ?? []).find((row: any) => row.key === state.key)?.app_id) ?? null,
       enabled: result.enabled,
       value: result.value,
       reason: result.reason,

@@ -52,7 +52,7 @@ export function SegmentsPage() {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="w-full max-w-4xl px-4 py-6 sm:px-8 space-y-4">
+      <div className="w-full px-4 py-6 sm:px-8 space-y-4">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">

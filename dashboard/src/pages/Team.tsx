@@ -57,7 +57,7 @@ export function TeamPage() {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="w-full max-w-4xl px-4 py-6 sm:px-8 space-y-6">
+      <div className="w-full px-4 py-6 sm:px-8 space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-lg font-medium text-slate-100">Team</h1>

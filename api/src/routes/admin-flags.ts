@@ -90,6 +90,7 @@ export async function handleAdminFlags(
     const env = url.searchParams.get("environment");
     const archived = url.searchParams.get("archived") === "true";
     const search = url.searchParams.get("q");
+    const appId = url.searchParams.get("app_id");
 
     let query = supabase
       .from("flags")
@@ -100,33 +101,62 @@ export async function handleAdminFlags(
       .range(from, to);
 
     if (search) query = query.ilike("name", `%${search}%`);
+    if (appId === "unassigned") query = query.is("app_id", null);
+    else if (appId) query = query.eq("app_id", appId);
 
     const { data, error, count } = await query;
     if (error) return err(error.message, 500, corsHeaders);
-    return json({ flags: data, total: count }, 200, corsHeaders);
+
+    // Keep this lookup separate from the flags query. It avoids relying on
+    // PostgREST's relationship cache immediately after the apps migration.
+    const appIds = [...new Set((data ?? []).map((flag: any) => flag.app_id).filter(Boolean))];
+    let appById = new Map<string, any>();
+    if (appIds.length) {
+      const { data: appRows, error: appError } = await supabase
+        .from("apps")
+        .select("id, name, slug")
+        .eq("org_id", ctx.orgId)
+        .in("id", appIds);
+      if (appError) return err(appError.message, 500, corsHeaders);
+      appById = new Map((appRows ?? []).map((app: any) => [app.id, app]));
+    }
+
+    const flags = (data ?? []).map((flag: any) => ({
+      ...flag,
+      apps: flag.app_id ? appById.get(flag.app_id) ?? null : null,
+    }));
+    return json({ flags, total: count }, 200, corsHeaders);
   }
 
   // ── POST /api/admin/flags ───────────────────────────────────
   if (!flagId && method === "POST") {
     if (!WRITE_ROLES.includes(ctx.role ?? "")) return err("Forbidden", 403, corsHeaders);
     const body = await request.json() as any;
-    const { key, name, description, type, tags } = body;
+    const { key, name, description, type, tags, app_id } = body;
     if (body.client_side !== undefined && typeof body.client_side !== "boolean") {
       return err("client_side must be a boolean", 400, corsHeaders);
     }
     const clientSide = body.client_side === true;
 
     if (!key || !name) return err("key and name are required", 400, corsHeaders);
+    if (!app_id) return err("app_id is required", 400, corsHeaders);
     if (!/^[a-z0-9-]+$/.test(key)) return err("key must be lowercase letters, numbers, hyphens", 400, corsHeaders);
+    const { data: app } = await supabase.from("apps").select("id").eq("id", app_id).eq("org_id", ctx.orgId).maybeSingle();
+    if (!app) return err("App not found in this organisation", 400, corsHeaders);
 
     // Create flag
     const { data: flag, error: flagErr } = await supabase
       .from("flags")
-      .insert({ org_id: ctx.orgId, key, name, description, type: type || "boolean", tags: tags || [], client_side: clientSide, created_by: ctx.userId })
+      .insert({ org_id: ctx.orgId, key, name, description, type: type || "boolean", tags: tags || [], app_id, client_side: clientSide, created_by: ctx.userId })
       .select()
       .single();
 
-    if (flagErr) return err(flagErr.message, 400, corsHeaders);
+    if (flagErr) {
+      if (flagErr.code === "23505" && flagErr.message.includes("flags_org_id_key_key")) {
+        return err("A flag with this key already exists in this organisation. Choose a different key.", 409, corsHeaders);
+      }
+      return err(flagErr.message, 400, corsHeaders);
+    }
 
     // Create default state for all environments
     const { data: envs } = await supabase
@@ -168,8 +198,15 @@ export async function handleAdminFlags(
     if (body.client_side !== undefined && typeof body.client_side !== "boolean") {
       return err("client_side must be a boolean", 400, corsHeaders);
     }
-    const allowed = ["name", "description", "tags", "archived", "client_side"];
+    const allowed = ["name", "description", "tags", "archived", "client_side", "app_id"];
     const update = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)));
+    if (update.app_id) {
+      const { data: app } = await supabase.from("apps").select("id").eq("id", update.app_id).eq("org_id", ctx.orgId).maybeSingle();
+      if (!app) return err("App not found in this organisation", 400, corsHeaders);
+    }
+    if (Object.prototype.hasOwnProperty.call(update, "app_id") && !update.app_id) {
+      return err("app_id cannot be cleared", 400, corsHeaders);
+    }
 
     const { data: old } = await supabase.from("flags").select().eq("id", flagId).eq("org_id", ctx.orgId).single();
     const { data, error } = await supabase.from("flags").update(update).eq("id", flagId).eq("org_id", ctx.orgId).select().single();

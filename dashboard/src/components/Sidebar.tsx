@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Flag, Globe, Key, ScrollText, Settings, LogOut, Zap, Users, Search, UserPlus } from 'lucide-react'
+import { Flag, Globe, Key, ScrollText, Settings, LogOut, Zap, Users, Search, UserPlus, Sun, Moon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const nav = [
@@ -13,7 +13,7 @@ const nav = [
   { to: '/settings',     icon: Settings,    label: 'Settings'     },
 ]
 
-export function Sidebar() {
+export function Sidebar({ theme, onThemeChange }: { theme: 'light' | 'dark'; onThemeChange: (theme: 'light' | 'dark') => void }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -67,6 +67,21 @@ export function Sidebar() {
           <LogOut size={13} />
           Sign out
         </button>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs text-slate-500">Theme</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={theme === 'light'}
+            aria-label="Toggle light and dark theme"
+            onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
+            className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${theme === 'light' ? 'bg-violet-600' : 'bg-slate-700'}`}
+          >
+            <span className={`flex h-4 w-4 items-center justify-center rounded-full bg-white shadow transition-transform ${theme === 'light' ? 'translate-x-5' : 'translate-x-0.5'}`}>
+              {theme === 'light' ? <Sun size={10} className="text-amber-500" /> : <Moon size={10} className="text-slate-600" />}
+            </span>
+          </button>
+        </div>
         <div className="pt-3 border-t border-slate-800/40">
           <div className="text-[10px] text-slate-600 mb-1">Built by</div>
           <a

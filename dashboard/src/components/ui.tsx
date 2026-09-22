@@ -164,7 +164,7 @@ export function ErrorMsg({ message }: { message: string | null }) {
 
 // ── Color dot ─────────────────────────────────────────────────
 export function ColorDot({ color }: { color: string }) {
-  return <span className="inline-block w-2 h-2 rounded-full" style={{ background: color }} />
+  return <span className="inline-block w-2 h-2 flex-shrink-0 rounded-full" style={{ backgroundColor: color }} />
 }
 
 // ── Type badge ────────────────────────────────────────────────
